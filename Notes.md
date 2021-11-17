@@ -13,8 +13,6 @@ unix:
 
 For dev, when package not installed on server:
 `export PYTHONPATH="${PYTHONPATH}:/path/to/your/project/"`
-e.g.
-`export PYTHONPATH="${PYTHONPATH}:/Users/zenman618/Documents/git_packages/FiDash/fidash/"`
 
 persistence=True — remembers dropdown value. Used with persistence_type
 persistence_type='memory'  — remembers dropdown value selected until browser tab is refreshed
