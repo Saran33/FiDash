@@ -9,8 +9,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from fidash.dtools import start_date, end_date, str_start, str_end, wdr_ticker, wdr_multi_ticker, indexed_vals
-from fidash.charts import quant_chart, single_line_chart, pwe_line_chart
+from dtools import start_date, end_date, str_start, str_end, wdr_ticker, wdr_multi_ticker, indexed_vals
+from charts import quant_chart, single_line_chart, pwe_line_chart
 
 symbols = ['FB', 'AMZN', 'GOOGL', ]
 
@@ -33,7 +33,7 @@ app.layout = dbc.Container([
     dbc.Row([
 
         dbc.Col([
-            dcc.Dropdown(id='sec-drpdwn', multi=False, value='AMZN',
+            dcc.Dropdown(id='sec-drpdwn', multi=False, value=None,
                          options=[{'label': x, 'value': x}
                                   for x in symbols], searchable=True, placeholder='Select security...',
                          persistence=True, persistence_type='memory',
@@ -46,7 +46,7 @@ app.layout = dbc.Container([
         ),
 
         dbc.Col([
-            dcc.Dropdown(id='sec-drpdwn2', multi=True, value=['FB'],
+            dcc.Dropdown(id='sec-drpdwn2', multi=True, value=[],
                          options=[{'label': x, 'value': x}
                                   for x in symbols], placeholder='Select security...',
                          persistence=True, persistence_type='memory',
@@ -104,51 +104,56 @@ app.layout = dbc.Container([
     Output('line-fig', 'figure'),
     Input('sec-drpdwn', 'value')
 )
+
+
 def update_graph(sltd_sec):
-    if len(sltd_sec) > 0:
-        df1 = wdr_ticker(sltd_sec, start_date, end_date, source='stooq')
-        ticker = sltd_sec
+    if sltd_sec:
+        if len(sltd_sec) > 0:
+            df1 = wdr_ticker(sltd_sec, start_date, end_date, source='stooq')
+            ticker = sltd_sec
 
-        # plt_int = single_line_chart(df['Close'], start_date=start_date, end_date=end_date, kind='scatter',
-        #                             title=f'{ticker} - {srt_start}:{srt_end}', ticker=ticker, yTitle='USD', showlegend=False,
-        #                             theme='white', auto_start=srt_start, auto_end=None, connectgaps=False, annots=None, annot_col=None)
+            # plt_int = single_line_chart(df['Close'], start_date=start_date, end_date=end_date, kind='scatter',
+            #                             title=f'{ticker} - {srt_start}:{srt_end}', ticker=ticker, yTitle='USD', showlegend=False,
+            #                             theme='white', auto_start=srt_start, auto_end=None, connectgaps=False, annots=None, annot_col=None)
 
-        plt_int = quant_chart(df1, start_date, end_date, ticker=ticker, title=f'{ticker}', theme='white', auto_start=str_start, auto_end=None,
-                              asPlot=False, asFigure=True, showlegend=False, boll_std=2, boll_periods=20, showboll=False, showrsi=False,
-                              rsi_periods=14, showama=False, ama_periods=9, showvol=True, show_range=False, annots=None, textangle=0,
-                              file_tag=None, support=None, resist=None, annot_font_size=6, title_dates=False, title_time=False,
-                              chart_ticker=True, top_margin=0.9, spacing=0.08, range_fontsize=9.8885, title_x=0.5,
-                              title_y=0.933, arrowhead=6, arrowlen=-50)
+            plt_int = quant_chart(df1, start_date, end_date, ticker=ticker, title=f'{ticker}', theme='white', auto_start=str_start, auto_end=None,
+                                asPlot=False, asFigure=True, showlegend=False, boll_std=2, boll_periods=20, showboll=False, showrsi=False,
+                                rsi_periods=14, showama=False, ama_periods=9, showvol=True, show_range=False, annots=None, textangle=0,
+                                file_tag=None, support=None, resist=None, annot_font_size=6, title_dates=False, title_time=False,
+                                chart_ticker=True, top_margin=0.9, spacing=0.08, range_fontsize=9.8885, title_x=0.5,
+                                title_y=0.933, arrowhead=6, arrowlen=-50)
 
-        return plt_int
+            return plt_int
 
-    elif len(sltd_sec) == 0:
+    elif (not sltd_sec) or (len(sltd_sec) == 0):
         raise dash.exceptions.PreventUpdate
 
-# Line chart - multiple
 
+# Line chart - multiple
 
 @app.callback(
     Output('line-fig2', 'figure'),
     Input('sec-drpdwn2', 'value')
 )
+
 def update_graph(sltd_sec):
-    if len(sltd_sec) > 0:
-        df2 = wdr_multi_ticker(sltd_sec, start_date, end_date,
-                               source='stooq', price='Close')
-        df2 = indexed_vals(df2)
-        auto_start = df2.index.min()
-        auto_end = df2.index.max()
-        symbol = ''
+    if sltd_sec:
+        if len(sltd_sec) > 0:
+            df2 = wdr_multi_ticker(sltd_sec, start_date, end_date,
+                                source='stooq', price='Close')
+            df2 = indexed_vals(df2)
+            auto_start = df2.index.min()
+            auto_end = df2.index.max()
+            symbol = ''
 
-        comp_lc1 = pwe_line_chart(df2, columns=sltd_sec, start_date=df2.index.min(), end_date=df2.index.max(),
-                                  kind='scatter', title=f'{", ".join(map(str, sltd_sec))}', ticker=symbol,
-                                  yTitle='Indexed Returns', asPlot=False, asFigure=True, showlegend=True,
-                                  theme='white', auto_start=auto_start, auto_end=auto_end, connectgaps=False,
-                                  file_tag=None, chart_ticker=False, annots=None)
-        return comp_lc1
+            comp_lc1 = pwe_line_chart(df2, columns=sltd_sec, start_date=df2.index.min(), end_date=df2.index.max(),
+                                    kind='scatter', title=f'{", ".join(map(str, sltd_sec))}', ticker=symbol,
+                                    yTitle='Indexed Returns', asPlot=False, asFigure=True, showlegend=True,
+                                    theme='white', auto_start=auto_start, auto_end=auto_end, connectgaps=False,
+                                    file_tag=None, chart_ticker=False, annots=None)
+            return comp_lc1
 
-    elif len(sltd_sec) == 0:
+    elif (not sltd_sec) or (len(sltd_sec) == 0):
         raise dash.exceptions.PreventUpdate
 
 # # Histogram

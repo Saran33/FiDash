@@ -28,7 +28,7 @@ def wdr_ticker(ticker, start_date, end_date, source='stooq'):
     """
 
     print('')
-    print("Security:", ticker)
+    # print("Security:", ticker)
     print('')
 
     tkr = ticker.replace('/', '_')
@@ -48,21 +48,20 @@ def wdr_ticker(ticker, start_date, end_date, source='stooq'):
 
         df = pd.read_csv(file_path, low_memory=False, index_col=[
                          'DateTime'], parse_dates=['DateTime'], infer_datetime_format=True)
-        df = pwe.sort_index(df, utc=False)
         df.name = f"{tkr}"
 
     else:
         print(f"No CSV: {file_path} found. Downloading data from {source} API")
 
-        df = web.DataReader(ticker, source, start=start_date,
-                            end=end_date)  # ['AMZN', 'GOOGL',] api_key=os.getenv('ALPHAVANTAGE_API_KEY')
+        df = pd.DataFrame(web.DataReader(ticker, source, start=start_date,
+                            end=end_date))  # ['AMZN', 'GOOGL',] api_key=os.getenv('ALPHAVANTAGE_API_KEY')
         # df=df.melt(ignore_index=False, value_name="price").reset_index()
         # df = df.stack().reset_index()
         df = pwe.sort_index(df, utc=True)
         df.index.names = ['DateTime']
         df[:15]
 
-        df.to_csv(file_path, index=False)
+        df.to_csv(file_path, index=True)
 
     return df
 
@@ -75,7 +74,7 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
     """
 
     print('')
-    print("Securities:", tickers)
+    # print("Securities:", tickers)
     print('')
 
     tkrs = []
