@@ -1,0 +1,62 @@
+/* :root{
+    --main-color: #181818;
+    --font-color: rgb(255, 255, 255) !important;
+    --text-primary: rgb(255, 255, 255) !important;
+    --font-family : Roboto, sans-serif !important;
+} */
+
+:root{
+    --main-color: rgb(255, 255, 255);
+    --font-color: #000 !important;
+    --text-primary: #000 !important;
+    --font-family : Roboto, sans-serif !important;
+}
+
+.dark-theme{
+    --main-color: #181818;
+    --font-color: rgb(255, 255, 255) !important;
+}
+
+body, table{
+    background-color: var(--main-color);
+    color: var(--font-color) !important;
+}
+
+.text-center.text-primary.mb-4.header-1 {
+    box-sizing : border-box; 
+    margin-top : 0px;
+    margin-bottom : 8px; 
+    font-family: var(font-family) !important;
+    font-weight : 500; 
+    line-height : 48px; 
+    font-size : 40px; 
+    padding : 8px 12px 8px 9.88px;
+}
+
+.header-1 {
+    color: var(--font-color) !important;
+    box-sizing : border-box; 
+    margin-top : 0px; 
+    margin-bottom : 8px; 
+    font-family: var(font-family) !important;
+    font-weight : 500; 
+    line-height : 48px; 
+    font-size : 40px; 
+    padding : 8px 12px 8px 9.88px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--font-color) !important;
+    font-family: var(font-family) !important;
+}
+
+p {
+    color: var(--font-color) !important;
+    font-family: var(font-family) !important;
+}
+
+/* input[type='checkbox'] {
+    color: #000 !important;
+    background-color : rgb(255, 255, 255) !important;
+    filter: invert(100%) hue-rotate(18deg) brightness(1.7);
+} */
