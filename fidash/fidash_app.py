@@ -10,9 +10,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 from dtools import start_date, end_date, str_start, str_end, wdr_ticker, wdr_multi_ticker, indexed_vals
-from charts import quant_chart, single_line_chart, pwe_line_chart
+from d_charts import quant_chart, single_line_chart, pwe_line_chart
+from sqlalch import all_tickers
 
-symbols = ['FB', 'AMZN', 'GOOGL', ]
+labels, symbols = all_tickers()
 
 # Define Dash App — https://www.bootstrapcdn.com/bootswatch/
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],  # LUX, BOOTSTRAP
@@ -34,8 +35,8 @@ app.layout = dbc.Container([
 
         dbc.Col([
             dcc.Dropdown(id='sec-drpdwn', multi=False, value=None,
-                         options=[{'label': x, 'value': x}
-                                  for x in symbols], searchable=True, placeholder='Select security...',
+                         options=[{'label': x, 'value': y}
+                                  for x, y in zip(labels, symbols)], searchable=True, placeholder='Select security...',
                          persistence=True, persistence_type='memory',
                          ),
             dcc.Graph(id='line-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
@@ -65,7 +66,7 @@ app.layout = dbc.Container([
                    style={"textDecoration": "underline"}),
             dcc.Checklist(id='my-checklist', value=['FB', 'GOOGL', 'AMZN'],
                           options=[{'label': x, 'value': x}
-                                   for x in symbols],
+                                   for x in symbols[:3]],
                           className="sel-sec-cb", labelClassName="mb-3"),
             # spacing class: mr-3, mt-3, mb-3 # labelStyle={"display": "inline-block"}
             dcc.Graph(id='my-hist', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',

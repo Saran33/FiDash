@@ -9,7 +9,9 @@ unix:
 `pip install dash`
 `pip install dash-bootstrap-components`
 `pip install git+git://github.com/Saran33/pwe_analysis.git`
+`pip install git+git://github.com/Saran33/TickerScrape`
 `pip install pandas-datareader`
+`pip install SQLAlchemy`
 
 For dev, when package not installed on server:
 `export PYTHONPATH="${PYTHONPATH}:/path/to/your/project/"`

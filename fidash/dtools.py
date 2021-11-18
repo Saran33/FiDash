@@ -130,3 +130,5 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
 
 def indexed_vals(df):
     return df.pct_change().fillna(0).add(1).cumprod().mul(100)
+
+
