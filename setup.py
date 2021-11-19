@@ -23,8 +23,9 @@ setup(
     install_requires=[
         'pwe @ git+https://github.com/Saran33/pwe_analysis',
         'TickerScrape @ git+git://github.com/Saran33/TickerScrape.git',
-        'yahoo_fin', 'yfinance', 'pandas-datareader',
-        'dash', 'dash-bootstrap-components', 'SQLAlchemy'
+        'yahoo_fin', 'yfinance', 'pandas-datareader', 'dash',
+        'dash-bootstrap-components', 'SQLAlchemy', 'matplotlib', 'seaborn', 'networkx',
+
     ],
     #package_dir={"": "src"},
     # packages=find_packages(where="fidash"),

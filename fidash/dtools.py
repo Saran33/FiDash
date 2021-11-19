@@ -11,7 +11,7 @@ import pwe.pwetools as pwe
 end_date = pytz.utc.localize(datetime.utcnow())
 str_end = pwe.dt_to_str(end_date)
 print("END:", end_date)
-start_date = (end_date - timedelta(days=30))
+start_date = (end_date - timedelta(days=365))
 str_start = pwe.dt_to_str(start_date)
 print("START", start_date)
 
@@ -57,11 +57,15 @@ def wdr_ticker(ticker, start_date, end_date, source='stooq'):
                             end=end_date))  # ['AMZN', 'GOOGL',] api_key=os.getenv('ALPHAVANTAGE_API_KEY')
         # df=df.melt(ignore_index=False, value_name="price").reset_index()
         # df = df.stack().reset_index()
-        df = pwe.sort_index(df, utc=True)
-        df.index.names = ['DateTime']
-        df[:15]
+        if len(df)>2:
+            df = pwe.sort_index(df, utc=True)
+            df.index.names = ['DateTime']
+            print (f"DOWNLOADED: {ticker}")
+            print (df[:5])
 
-        df.to_csv(file_path, index=True)
+            df.to_csv(file_path, index=True)
+        else:
+            print (f"No data found for {ticker}")
 
     return df
 
@@ -112,15 +116,19 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
                                 end=end_date))
             # df=df.melt(ignore_index=False, value_name="price").reset_index()
             # df = df.stack().reset_index()
-            df = pwe.sort_index(df, utc=True)
-            df.index.names = ['DateTime']
-            df[:15]
+            if len(df)>2:
+                df = pwe.sort_index(df, utc=True)
+                df.index.names = ['DateTime']
+                print (f"DOWNLOADED: {tkr}")
+                print (df[:5])
 
-            df.to_csv(file_path, index=True)
+                df.to_csv(file_path, index=True)
 
-            df = df[[price]]
-            df = df.rename(columns={price: tkr})
-            df_list.append(df)
+                df = df[[price]]
+                df = df.rename(columns={price: tkr})
+                df_list.append(df)
+            else:
+                print (f"No data found for {tkr}")
             
         # dfs = dfs.join(df)
         if df_list:
