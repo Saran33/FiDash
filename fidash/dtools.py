@@ -140,3 +140,5 @@ def indexed_vals(df):
     return df.pct_change().fillna(0).add(1).cumprod().mul(100)
 
 
+def ext_str_lst(str_list):
+    return ", ".join(map(str, str_list))

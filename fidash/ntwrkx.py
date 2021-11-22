@@ -419,8 +419,8 @@ def plot_mst(df, ann_factor=252, corr_threshold=0.5, node_size_factor=10, savefi
                       showticklabels=False)
 
     layout = dict(title='Correlations - Minimum Spanning Tree',
-                  width=400,
-                  height=620,
+                #   width=400,
+                #   height=620,
                   autosize=True,
                   showlegend=False,
                   xaxis=axis_style,

@@ -518,7 +518,7 @@ def quant_chart(df, start_date, end_date, ticker=None, title=None, theme='henani
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return fig # chart_html, chart_file
+    return fig  # chart_html, chart_file
 
 
 def single_line_chart(df, start_date, end_date, columns=None, kind='scatter', title=None, ticker=None,
@@ -581,7 +581,8 @@ def single_line_chart(df, start_date, end_date, columns=None, kind='scatter', ti
                                colors=colors, fontfamily='Roboto', theme=theme, asPlot=asPlot, asFigure=asFigure, filename=f'./{f_name}',
                                rangeselector=dict(steps=['Reset', '3Y', '2Y', '1Y', 'YTD', '6M', '1M'],
                                                   bgcolor=(PWE_skin, .2), fontsize=range_fontsize, fontfamily='Roboto', x=-0.025, y=1, visible=True),
-                               xrange=[auto_start, auto_end], connectgaps=connectgaps,
+                               xrange=[auto_start,
+                                       auto_end], connectgaps=connectgaps,
                                title={'text': f'{chart_title}', 'y': title_y, 'x': title_x, 'xanchor': 'center', 'yanchor': 'top'})
         else:
 
@@ -633,7 +634,7 @@ def single_line_chart(df, start_date, end_date, columns=None, kind='scatter', ti
     # fig.show()
 
     # print(f_name)
-    return plt_int # , f_name
+    return plt_int  # , f_name
 
 # help(brr.iplot)
 # cf.tools.get_range_selector
@@ -755,7 +756,7 @@ def pwe_line_chart(df, start_date, end_date, columns=None, kind='scatter', title
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return plt_int # chart_html, chart_file
+    return plt_int  # chart_html, chart_file
 
 
 def pwe_return_dist_chart(df, start_date, end_date, tseries='Price_Returns', kind='scatter', title=None, ticker=None, yTitle=None, asPlot=False, asFigure=True,
@@ -855,7 +856,7 @@ def pwe_return_dist_chart(df, start_date, end_date, tseries='Price_Returns', kin
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return plt_int # chart_html, chart_file
+    return plt_int  # chart_html, chart_file
 
 
 def pwe_return_bar_chart(df, start_date, end_date, tseries='Price_Returns', kind='scatter', title=None, ticker=None, yTitle=None, xTitle=None,
@@ -949,7 +950,7 @@ def pwe_return_bar_chart(df, start_date, end_date, tseries='Price_Returns', kind
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return plt_int # chart_html, chart_file
+    return plt_int  # chart_html, chart_file
 
 
 def pwe_hist(df, start_date, end_date, tseries='Price_Returns', title=None, ticker=None, yTitle=None, xTitle=None, asPlot=False,
@@ -1017,8 +1018,10 @@ def pwe_hist(df, start_date, end_date, tseries='Price_Returns', title=None, tick
             str)+", "+df['Series_str']
     elif 'DateTime' in df:
         df['Date_Ret_str'] = df['DateTime'].astype(str)+", "+df['Series_str']
-    else:
+    elif 'Date' in df:
         df['Date_Ret_str'] = df['Date'].astype(str)+", "+df['Series_str']
+    else:
+        df['Date_Ret_str'] = df.index.astype(str)+", "+df['Series_str']
 
     hovertext = df['Date_Ret_str'].values.tolist()
     text = df['Series_str'].values.tolist()
@@ -1063,7 +1066,7 @@ def pwe_hist(df, start_date, end_date, tseries='Price_Returns', title=None, tick
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return plt_int # chart_html, chart_file
+    return plt_int  # chart_html, chart_file
 
 
 def pwe_box(df, start_date=None, end_date=None, title=None, ticker=None, yTitle=None, xTitle=None, asPlot=False,
@@ -1143,7 +1146,7 @@ def pwe_box(df, start_date=None, end_date=None, title=None, ticker=None, yTitle=
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return plt_int # chart_html, chart_file
+    return plt_int  # chart_html, chart_file
 
 
 def calc_table_height(df, base=244, height_per_row=20, char_limit=30, height_padding=16.5):
@@ -1247,7 +1250,7 @@ def pwe_table(df, file_tag=None, ticker=None, head_text_size=16, text_size=12, h
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return fig # chart_html, chart_file
+    return fig  # chart_html, chart_file
 
 
 def pwe_line_scatter_chart(df, marker_x, marker_y, start_date, end_date, columns=None, kind='scatter', title=None,
@@ -1376,7 +1379,7 @@ def pwe_line_scatter_chart(df, marker_x, marker_y, start_date, end_date, columns
 
     # chart_html, chart_file = pwe_format(f_name)
 
-    return plt_int # chart_html, chart_file
+    return plt_int  # chart_html, chart_file
 
 
 def custom_html(f_name, string_from, string_to):
@@ -1471,3 +1474,126 @@ def add_range_selector(layout, axis_name='xaxis', ranges=None, default=None):
             start_date = (
                 end_date - dateutil.relativedelta.relativedelta(**{step: count}))
         axis.setdefault('range', [start_date, end_date])
+
+
+def calc_interval(df):
+    """Calculate the interval between timestamps for chart labels."""
+    if df.index[1] - df.index[0] == timedelta(days=1):
+        chart_interval = "Daily"
+        interval = "daily"
+    if df.index[1] - df.index[0] == timedelta(hours=1):
+        chart_interval = "Hourly"
+        interval = "hourly"
+    if df.index[1] - df.index[0] == timedelta(minutes=1):
+        chart_interval = "Per Minute"
+        interval = "minutes"
+    if df.index[1] - df.index[0] == timedelta(seconds=1):
+        chart_interval = "Per Second"
+        interval = "seconds"
+    if df.index[1] - df.index[0] == timedelta(weeks=1):
+        chart_interval = "Weekly"
+        interval = "weekly"
+    if timedelta(days=32) >= df.index[1] - df.index[0] >= timedelta(days=27):
+        chart_interval = "Monthly"
+        interval = "monthly"
+    if timedelta(days=182) >= df.index[1] - df.index[0] >= timedelta(days=90):
+        chart_interval = "Semi-Annual"
+        interval = "semi-annual"
+    if timedelta(days=360) >= df.index[1] - df.index[0] >= timedelta(days=182):
+        chart_interval = "Annual"
+        interval = "annual"
+    return chart_interval, interval
+
+
+def pwe_heatmap(df, start_date=None, end_date=None, title=None, ticker=None, yTitle=None, xTitle=None, asPlot=False,
+                asFigure=True, theme='white', showlegend=False, decimals=2, textangle=0, file_tag=None,
+                interval='Daily', linecolor=None, title_dates=True, colorscale=None,
+                title_time=True, chart_ticker=True, top_margin=0.9, spacing=0.08, title_x=0.5, title_y=0.933):
+    """
+
+    Plots an interactive heatmap formatted in the PWE style.
+
+    center_scale : float
+        Centers the colorscale at a specific value
+        Automatically sets the (zmin,zmax) values
+    zmin : float
+        Defines the minimum range for the z values. 
+        This affects the range for the colorscale
+    zmax : float
+        Defines the maximum range for the z values. 
+        This affects the range for the colorscale
+
+    See: https://github.com/santosjorge/cufflinks/blob/master/cufflinks/plotlytools.py
+    """
+    dark = ("henanigans", "solar", "space")
+    if str(theme) in dark:
+        fontcolor = 'henanigans_light1'
+        arrowcolor = 'henanigans_light1'
+        style = 'dark'
+    else:
+        fontcolor = PWE_ig_light_grey
+        arrowcolor = PWE_ig_dark_grey
+        style = theme
+
+    if linecolor == None or linecolor == 'PWE_grey':
+        linecolor = PWE_grey
+    elif linecolor == 'PWE':
+        linecolor = PWE_skin
+
+    # colors = [PWE_skin, PWE_grey]
+    if not colorscale:
+        colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)',]
+        # colorscale=[[0, "rgb(100, 100, 111)"],
+        #             [0.0555555555555556, "rgb(106, 104, 116)"],
+        #             [0.1111111111111111, "rgb(112,108,120)"],
+        #             [0.1666666666666667, "rgb(118,111,125)"],
+        #             [0.2222222222222222, "rgb(125,115,129)"],
+        #             [0.2777777777777778, "rgb(132,119,133)"],
+        #             [0.3333333333333333, "rgb(139,123,136)"],
+        #             [0.3888888888888889, "rgb(146,127,139)"],
+        #             [0.4444444444444444, "rgb(152,131,142)"],
+        #             [0.4999999999999999, "rgb(159,135,145)"],
+        #             [0.5555555555555556, "rgb(166,139,148)"],
+        #             [0.6180339887498948, "rgb(173,143,150)"],
+        #             [0.6666666666666666, "rgb(179,147,152)"],
+        #             [0.7222222222222215, "rgb(186,151,154)"],
+        #             [0.7777777777777778, "rgb(192,156,156)"],
+        #             [0.8333333333333333, "rgb(197,161,157)"],
+        #             [0.8888888888888888, "rgb(203,166,159)"],
+        #             [0.9194444444444444, "rgb(208,171,161)"],
+        #             [0.95, "rgb(212,176,162)"],
+        #             [0.975, "rgb(216,181,164)"],
+        #             [1.0, "rgb(220,187,166)"]]
+
+    sdate, edate, chart_dates = chart_file_dates(
+        df, start_date, end_date, time=title_time)
+
+    if xTitle == None:
+        xTitle = f'{interval} Return Correlation'
+
+    check_folder('charts')
+
+    tkr = ticker.replace('/', '_')
+
+    if file_tag == None:
+
+        if hasattr(df, 'name'):
+            df_name = df.name.replace('/', '_').replace(' ', '_')
+            f_name = f'/charts/{tkr}_{df_name}_{sdate}-{edate}_heatmap_{style}'
+        else:
+            f_name = f'/charts/{tkr}_{sdate}-{edate}_heatmap_{style}'
+
+    else:
+        f_name = f'/charts/{tkr}_{file_tag}_{sdate}-{edate}_heatmap_{style}'
+
+    chart_title = get_chart_title(
+        title, chart_ticker, title_dates, ticker, chart_dates)
+
+    plt_int = df.iplot(kind="heatmap", theme=theme, showlegend=showlegend, legend='top', rangeslider=False,
+                       xTitle=xTitle, yTitle=yTitle, colorscale=colorscale, fontfamily='Roboto', asPlot=asPlot, asFigure=asFigure,
+                       filename=f'./{f_name}', hoverinfo="text", textangle=textangle,
+                       title={'text': f'{chart_title}', 'y': title_y, 'x': title_x, 'xanchor': 'center', 'yanchor': 'top'})
+
+    # chart_html, chart_file = pwe_format(f_name)
+
+    return plt_int  # chart_html, chart_file
