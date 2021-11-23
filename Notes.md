@@ -20,3 +20,6 @@ persistence=True — remembers dropdown value. Used with persistence_type
 persistence_type='memory'  — remembers dropdown value selected until browser tab is refreshed
 persistence_type='session' — until browser tab is closed
 persistence_type='local': until browser cookies are deleted
+
+# Check repo size:
+curl -s https://github.com/Saran33/FiDash | jq '.size' | numfmt --to=iec --from-unit=1024

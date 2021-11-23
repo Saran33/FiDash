@@ -8,12 +8,12 @@ from datetime import datetime, timedelta
 import pytz
 import pwe.pwetools as pwe
 
-end_date = pytz.utc.localize(datetime.utcnow())
-str_end = pwe.dt_to_str(end_date)
-print("END:", end_date)
-start_date = (end_date - timedelta(days=365))
-str_start = pwe.dt_to_str(start_date)
-print("START", start_date)
+# end_date = pytz.utc.localize(datetime.utcnow())
+# str_end = pwe.dt_to_str(end_date)
+# print("END:", end_date)
+# start_date = (end_date - timedelta(days=365))
+# str_start = pwe.dt_to_str(start_date)
+# print("START", start_date)
 
 # Find securities functions
 
@@ -35,8 +35,8 @@ def wdr_ticker(ticker, start_date, end_date, source='stooq'):
 
     print("Checking if a file for this ticker with the same start and end dates exists...")
     # csv_start, csv_end = pwe.get_file_datetime(start_date, end_date)
-    csv_start = str_start
-    csv_end = str_end
+    csv_start = pwe.dt_to_str(start_date)
+    csv_end = pwe.dt_to_str(end_date)
 
     file_path = os.path.abspath(
         f'csv_files/{tkr}_{csv_start}_{csv_end}.csv')
@@ -88,8 +88,8 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
 
     print("Checking if ticker files exist locally...")
     # csv_start, csv_end = pwe.get_file_datetime(start_date, end_date)
-    csv_start = str_start
-    csv_end = str_end
+    csv_start = pwe.dt_to_str(start_date)
+    csv_end = pwe.dt_to_str(end_date)
 
     df_list = []
 

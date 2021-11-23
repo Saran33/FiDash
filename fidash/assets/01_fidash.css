@@ -7,9 +7,18 @@
 
 :root{
     --main-color: rgb(255, 255, 255);
+    --primary-color: #64646F !important;
+    --secondary-color: rgb(220, 187, 166) !important;
     --font-color: #000 !important;
     --text-primary: #000 !important;
+    --pwe-lightest: rgb(237,221,213) !important;
+    --pwe-lighter: rgb(229, 205, 191) !important;
+    --pwe-skin: rgb(220, 187, 166) !important;
+    --pwe-darker: rgb(211, 171, 149) !important;
+    --pwe-grey: #64646F !important;
+    --pwe-blue: #a4b3c1 !important;
     --font-family : Roboto, sans-serif !important;
+
 }
 
 .dark-theme{
@@ -26,7 +35,7 @@ body, table{
     box-sizing : border-box; 
     margin-top : 0px;
     margin-bottom : 8px; 
-    font-family: var(font-family) !important;
+    font-family: var(--font-family) !important;
     font-weight : 500; 
     line-height : 48px; 
     font-size : 40px; 
@@ -38,7 +47,7 @@ body, table{
     box-sizing : border-box; 
     margin-top : 0px; 
     margin-bottom : 8px; 
-    font-family: var(font-family) !important;
+    font-family: var(--font-family) !important;
     font-weight : 500; 
     line-height : 48px; 
     font-size : 40px; 
@@ -47,12 +56,12 @@ body, table{
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--font-color) !important;
-    font-family: var(font-family) !important;
+    font-family: var(--font-family) !important;
 }
 
 p {
     color: var(--font-color) !important;
-    font-family: var(font-family) !important;
+    font-family: var(--font-family) !important;
 }
 
 /* input[type='checkbox'] {
@@ -60,3 +69,143 @@ p {
     background-color : rgb(255, 255, 255) !important;
     filter: invert(100%) hue-rotate(18deg) brightness(1.7);
 } */
+
+.DateRangePickerInput {
+    background-color : rgb(255, 255, 255); 
+    display : inline-block; 
+    border-radius : 2px; 
+    border : 1px solid rgb(219, 219, 219); 
+    padding-right : 30px;
+    font-family: var(--font-family) !important;
+}
+
+.DateInput_input {
+    font-family: var(--font-family) !important;
+    outline : rgb(0, 0, 0) none 0px; 
+    font-weight : 200; 
+    font-size : 15px !important; 
+    line-height : 24px; 
+    color : rgb(72, 72, 72); 
+    background-color : rgb(255, 255, 255); 
+    width : 130px; 
+    padding : 11px 11px 9px; 
+    border-image : none; 
+    border-width : 0px 0px 2px; 
+    border-top-style : none; 
+    border-top-color : rgb(72, 72, 72); 
+    border-right-style : none; 
+    border-right-color : rgb(72, 72, 72); 
+    border-bottom-style : solid; 
+    border-bottom-color : var(--pwe-darker) !important; 
+    border-left-style : none; 
+    border-left-color : rgb(72, 72, 72); 
+    border-radius : 0px; 
+    background : rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box; 
+    box-sizing : border-box; 
+}
+
+.CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_3 {
+    box-sizing : border-box;
+    cursor : pointer;
+    font-size : 14px;
+    text-align : center;
+    border : 1px double var(--pwe-lighter) !important;
+    color : rgb(255, 255, 255);
+    background : var(--pwe-darker) none repeat scroll 0% 0% / auto padding-box border-box !important;
+}
+.CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_3:hover {
+    background : var(--pwe-lighter) !important;
+    border : 1px double var(--pwe-lighter) !important;
+    color : rgb(255, 255, 255);
+}
+
+.CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_4 {
+    box-sizing : border-box;
+    cursor : pointer;
+    font-size : 14px;
+    text-align : center;
+    border : 1px double var(--pwe-lighter) !important;
+    color : rgb(255, 255, 255);
+    background : var(--pwe-lighter) none repeat scroll 0% 0% / auto padding-box border-box !important;
+}
+.CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_4:hover {
+    background : var(--pwe-lighter) !important;
+    border : 1px double var(--pwe-lighter) !important;
+    color : rgb(255, 255, 255);
+}
+
+.CalendarDay.CalendarDay__firstDayOfWeek.CalendarDay__selected_span {
+    box-sizing : border-box;
+    cursor : pointer;
+    font-size : 14px;
+    text-align : center;
+    border : 1px double var(--pwe-lighter) !important;
+    color : rgb(255, 255, 255);
+    background : var(--pwe-darker) none repeat scroll 0% 0% / auto padding-box border-box !important;
+}
+
+.CalendarDay.CalendarDay__firstDayOfWeek.CalendarDay__selected_span:hover {
+    color : rgb(255, 255, 255);
+    background : var(--pwe-lighter) !important;
+    border : 1px double var(--pwe-lighter) !important;
+}
+
+.CalendarDay.CalendarDay__lastDayOfWeek.CalendarDay__selected_span {
+    box-sizing : border-box;
+    cursor : pointer;
+    font-size : 14px;
+    text-align : center;
+    border : 1px double var(--pwe-lighter) !important;
+    color : rgb(255, 255, 255);
+    background : var(--pwe-darker) none repeat scroll 0% 0% / auto padding-box border-box !important;
+}
+
+.CalendarDay.CalendarDay__lastDayOfWeek.CalendarDay__selected_span:hover {
+    color : rgb(255, 255, 255);
+    background : var(--pwe-lighter) !important;
+    border : 1px double var(--pwe-lighter) !important;
+}
+
+.CalendarDay.CalendarDay__selected_start {
+    box-sizing : border-box;
+    cursor : pointer;
+    font-size : 14px;
+    text-align : center;
+    border : 1px double var(--pwe-skin) !important; 
+    color : rgb(255, 255, 255);
+    background : var(--pwe-grey) none repeat scroll 0% 0% / auto padding-box border-box !important;
+}
+
+.CalendarDay.CalendarDay__selected_start:hover {
+    background : var(--pwe-lightest) !important;
+    border : 1px double var(--pwe-lightest) !important;
+    color : rgb(255, 255, 255);
+}
+
+.CalendarDay__selected_end {
+    box-sizing : border-box;
+    cursor : pointer;
+    font-size : 14px;
+    text-align : center;
+    border : 1px double var(--pwe-skin) !important; 
+    color : rgb(255, 255, 255);
+    background : var(--pwe-grey) none repeat scroll 0% 0% / auto padding-box border-box !important;
+}
+
+.CalendarDay.CalendarDay__selected_end:hover {
+    background : var(--pwe-lightest) !important;
+    border : 1px double var(--pwe-lightest) !important;
+    color : rgb(255, 255, 255);
+}
+
+.DayPickerKeyboardShortcuts_show__bottomRight::before {
+    border-top : 26px solid transparent !important;
+    border-right : 33px solid var(--pwe-skin) !important;
+}
+
+.DayPickerKeyboardShortcuts_showSpan.DayPickerKeyboardShortcuts_showSpan_1.DayPickerKeyboardShortcuts_showSpan__bottomRight.DayPickerKeyboardShortcuts_showSpan__bottomRight_2 {
+    color : rgb(255, 255, 255); 
+    position : absolute; 
+    bottom : 0px; 
+    right : 5px; 
+}

@@ -122,6 +122,8 @@ def get_chart_dates(df, start_date=None, end_date=None, utc=True, auto_start=Non
 
 
 def chart_file_dates(df, start_date=None, end_date=None, time=True):
+    if (not isinstance(start_date, datetime)) or (not isinstance(end_date, datetime)):
+        time = False
     if time:
         if start_date == None:
             sdate = df.index.strftime('%Y-%m-%d_%H:%M:%S').min()
@@ -230,7 +232,10 @@ def get_chart_title(title, chart_ticker, title_dates, ticker, chart_dates):
     return chart_title
 
 
-PWE_skin = "#DCBBA6"
+PWE_skin = "#DCBBA6" # "rgb(220,187,166)"
+skin_lighter = "#E5CDBF" # "rgb(229,205,191)"
+skin_lightest = "#EDDDD5" # "rgb(237,221,213)"
+skin_darker = "#d3ab95" # "rgb(211,171,149)"
 black = "#000000"
 PWE_grey = "#64646F"
 PWE_blue = "#a4b3c1"
@@ -549,7 +554,7 @@ def single_line_chart(df, start_date, end_date, columns=None, kind='scatter', ti
         style = theme
 
     colors = [PWE_skin, PWE_grey, black, vic_teal,
-              PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey]
+              PWE_blue, skin_lighter, skin_darker, PWE_ig_light_grey, PWE_ig_dark_grey]
 
     chart_start, chart_end, auto_start, auto_end = get_chart_dates(
         df=df, start_date=None, end_date=None, utc=True, auto_start=auto_start, auto_end=auto_end)
@@ -676,8 +681,8 @@ def pwe_line_chart(df, start_date, end_date, columns=None, kind='scatter', title
         arrowcolor = PWE_ig_light_grey
         style = theme
 
-    colors = [PWE_skin, PWE_grey, black, vic_teal,
-              PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey]
+    colors = [PWE_skin, PWE_grey, black, vic_teal, PWE_blue,
+                skin_darker, PWE_ig_light_grey, skin_lighter, PWE_ig_dark_grey]
 
     chart_start, chart_end, auto_start, auto_end = get_chart_dates(
         df=df, start_date=None, end_date=None, utc=True, auto_start=auto_start, auto_end=auto_end)
@@ -731,7 +736,7 @@ def pwe_line_chart(df, start_date, end_date, columns=None, kind='scatter', title
     else:
         if annots == None:
             plt_int = df[columns].iplot(kind=kind, showlegend=showlegend, legend=legend, rangeslider=False,
-                                        xTitle='Date', yTitle=yTitle, colors=[PWE_skin, PWE_grey], fontfamily='Roboto',
+                                        xTitle='Date', yTitle=yTitle, colors=colors, fontfamily='Roboto',
                                         theme=theme, asPlot=asPlot, asFigure=asFigure, filename=f'.{f_name}',
                                         rangeselector=dict(steps=['Reset', '3Y', '2Y', '1Y', 'YTD', '6M', '1M'],
                                                            bgcolor=(PWE_skin, .2), fontsize=range_fontsize, fontfamily='Roboto',
@@ -883,8 +888,10 @@ def pwe_return_bar_chart(df, start_date, end_date, tseries='Price_Returns', kind
         arrowcolor = PWE_ig_dark_grey
         style = theme
 
+    # colors = [PWE_skin, PWE_grey, black, vic_teal,
+    #           PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey]
     colors = [PWE_skin, PWE_grey, black, vic_teal,
-              PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey]
+              PWE_blue, skin_lighter, skin_darker, PWE_ig_light_grey, PWE_ig_dark_grey]
 
     chart_start, chart_end, auto_start, auto_end = get_chart_dates(
         df=df, start_date=None, end_date=None, utc=True, auto_start=auto_start, auto_end=auto_end)
@@ -1106,8 +1113,12 @@ def pwe_box(df, start_date=None, end_date=None, title=None, ticker=None, yTitle=
     elif linecolor == 'PWE':
         linecolor = PWE_skin
 
+    # colors = [PWE_skin, PWE_grey, black, vic_teal,
+    #           PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey,]
     colors = [PWE_skin, PWE_grey, black, vic_teal,
-              PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey]
+              PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey, skin_darker, skin_lighter]
+    # colors = [PWE_skin, PWE_grey, black, vic_teal, PWE_blue,
+    #             skin_darker, PWE_ig_light_grey, PWE_ig_dark_grey, skin_lighter]
 
     sdate, edate, chart_dates = chart_file_dates(
         df, start_date, end_date, time=title_time)

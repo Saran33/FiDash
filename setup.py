@@ -23,7 +23,7 @@ setup(
     install_requires=[
         'pwe @ git+https://github.com/Saran33/pwe_analysis',
         'TickerScrape @ git+git://github.com/Saran33/TickerScrape.git',
-        'yahoo_fin', 'yfinance', 'pandas-datareader', 'dash',
+        'yahoo_fin', 'yfinance', 'pandas-datareader', 'dash', 'dash-datetimepicker',
         'dash-bootstrap-components', 'SQLAlchemy', 'matplotlib', 'seaborn', 'networkx',
 
     ],

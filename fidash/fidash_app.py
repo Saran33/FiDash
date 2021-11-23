@@ -5,15 +5,19 @@ from dash import dcc
 from dash import html
 from dash.dependencies import Output, Input
 import dash_bootstrap_components as dbc
+import dash_datetimepicker as dash_dt
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-from dtools import start_date, end_date, str_start, str_end, wdr_ticker, wdr_multi_ticker, indexed_vals, ext_str_lst
+from dtools import wdr_ticker, wdr_multi_ticker, indexed_vals, ext_str_lst # start_date, end_date, str_start, str_end
 from d_charts import quant_chart, single_line_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_return_dist_chart, pwe_box, pwe_heatmap
 from pwe.analysis import Security
+from pwe.pwetools import str_to_dt, to_utc
 from sqlalch import all_tickers
 from ntwrkx import plot_mst
+from datetime import datetime, timedelta
+import pytz
 
 labels, symbols = all_tickers()
 
@@ -42,6 +46,34 @@ app.layout = dbc.Container([
                          # persistence_type= session, memory
                          persistence=True, persistence_type='session',
                          ),
+                         dcc.Store(id='intermediate-value1'),
+            # html.Div(
+            #     [dash_dt.DashDatetimepicker(id="dt-picker-range", utc=True, locale="en-GB"), html.Div(id="output-dt-picker-range")]
+            # ),
+            dcc.DatePickerRange(
+                    id='dt-picker-range',  # ID for callback
+                    calendar_orientation='horizontal',  # vertical or horizontal
+                    day_size=39,  # Size of calendar image. Default is 39
+                    end_date_placeholder_text="End Date",  # text that appears when no end date chosen
+                    with_portal=False,  # If True, calendar opens in a full screen overlay portal
+                    first_day_of_week=0,  # Display of calendar when open (0 = Sunday)
+                    reopen_calendar_on_clear=True,
+                    is_RTL=False,  # True or False for direction of calendar (right to left)
+                    clearable=True,  # Whether the calendar is clearable
+                    number_of_months_shown=1,  # Number of months displayed in dropdown
+                    min_date_allowed=datetime(1900, 1, 1),
+                    max_date_allowed=datetime.now().date(),
+                    initial_visible_month=datetime(2021, 1, 1),  # Default visible month
+                    start_date=(datetime.utcnow() - timedelta(days=365)).date(),
+                    end_date=datetime.now().date(),
+                    display_format='D MMM YYYY',  # Do
+                    month_format='MMMM, YYYY',  # How calendar headers are displayed on open.
+                    minimum_nights=1,  # Minimum allowable days between start and end.
+                    persistence=True,  # Whether the user's selected dates will be cached.
+                    persisted_props=['start_date'], # What will be cached
+                    persistence_type='session',  # session, local, or memory. Default is 'local'
+                    updatemode='singledate'  # singledate or bothdates. Select when callback is triggered
+                ),
             dcc.Graph(id='cand-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                                                         # 'modeBarButtonsToRemove': ['pan2d','select2d'], modeBarButtonsToAdd
                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False})
@@ -55,6 +87,7 @@ app.layout = dbc.Container([
                                   for x in symbols], placeholder='Select security...',
                          persistence=True, persistence_type='session',
                          ),
+                         dcc.Store(id='intermediate-value2'),
             dcc.Graph(id='line-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
         ],  # width={'size':5, 'offset':0, 'order':2},
@@ -116,18 +149,86 @@ app.layout = dbc.Container([
 
 # Callbacks (connect components)
 # --------------------------------------------
+# Load single security dataframe
+@app.callback(Output('intermediate-value1', 'data'),
+    [Input('sec-drpdwn', 'value'),
+    Input('dt-picker-range', 'start_date'),
+    Input('dt-picker-range', 'end_date')]
+)
+def get_data1(sltd_sec, start_date, end_date):
+    if sltd_sec:
+        if len(sltd_sec) > 0:
+            start_date = str_to_dt(start_date, dayfirst=False)
+            if start_date.tzinfo == None:
+                start_date = to_utc(start_date)
+            if start_date:
+                print("START DATE:",start_date)
+            end_date = str_to_dt(end_date)
+            if end_date.tzinfo == None:
+                end_date = to_utc(end_date)
+            if end_date:
+                print("END DATE:",end_date)
+            try:
+                df1 = wdr_ticker(sltd_sec, start_date, end_date, source='stooq')
+            except:
+                return # html.Div(f"No data available for {sltd_sec}")
+
+            json1 = df1.to_json(date_format='iso', orient='split')
+
+            return json1
+
+    elif (not sltd_sec) or (len(sltd_sec) == 0):
+        raise dash.exceptions.PreventUpdate
+
+
+# Load multi-security dataframe
+@app.callback(Output('intermediate-value2', 'data'),
+    [Input('sec-drpdwn2', 'value'),
+    Input('dt-picker-range', 'start_date'),
+    Input('dt-picker-range', 'end_date')]
+)
+def get_data2(sltd_sec, start_date, end_date):
+    if sltd_sec:
+        if len(sltd_sec) > 0:
+            start_date = str_to_dt(start_date, dayfirst=False)
+            if start_date.tzinfo == None:
+                start_date = to_utc(start_date)
+            if start_date:
+                print("START DATE:",start_date)
+            end_date = str_to_dt(end_date)
+            if end_date.tzinfo == None:
+                end_date = to_utc(end_date)
+            if end_date:
+                print("END DATE:",end_date)
+            df2 = wdr_multi_ticker(sltd_sec, start_date, end_date, source='stooq', price='Close')
+
+            json2 = df2.to_json(date_format='iso', orient='split')
+
+            return json2
+
+    elif (not sltd_sec) or (len(sltd_sec) == 0):
+        raise dash.exceptions.PreventUpdate
+
+
 # Line chart - Single
 @app.callback(
     Output('cand-fig', 'figure'),
-    Input('sec-drpdwn', 'value')
+    [Input('sec-drpdwn', 'value'),
+    Input('intermediate-value1', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json1):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df1 = wdr_ticker(sltd_sec, start_date, end_date, source='stooq')
+            df1 = pd.read_json(json1, orient='split')
+            # df1['DateTime'] = pd.to_datetime(df1['DateTime'])
             ticker = sltd_sec
-            auto_start = df1.index.min()
-            auto_end = df1.index.max()
+            start_date = df1.index.min()
+            auto_start = start_date
+            end_date = df1.index.max()
+            auto_end = end_date
             # plt_int = single_line_chart(df['Close'], start_date=start_date, end_date=end_date, kind='scatter',
             #                             title=f'{ticker} - {srt_start}:{srt_end}', ticker=ticker, yTitle='USD', showlegend=False,
             #                             theme='white', auto_start=srt_start, auto_end=None, connectgaps=False, annots=None, annot_col=None)
@@ -148,19 +249,24 @@ def update_graph(sltd_sec):
 # Line chart - multiple
 @app.callback(
     Output('line-fig', 'figure'),
-    Input('sec-drpdwn2', 'value')
+    [Input('sec-drpdwn2', 'value'),
+    Input('intermediate-value2', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json2):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df2 = wdr_multi_ticker(sltd_sec, start_date, end_date,
-                                   source='stooq', price='Close')
+            df2 = pd.read_json(json2, orient='split')
             df2 = indexed_vals(df2)
-            auto_start = df2.index.min()
-            auto_end = df2.index.max()
+            start_date = df2.index.min()
+            auto_start = start_date
+            end_date = df2.index.max()
+            auto_end = end_date
             symbol = ''
 
-            comp_lc1 = pwe_line_chart(df2, columns=sltd_sec, start_date=df2.index.min(), end_date=df2.index.max(),
+            comp_lc1 = pwe_line_chart(df2, columns=sltd_sec, start_date=start_date, end_date=end_date,
                                       kind='scatter', title=f'{ext_str_lst(sltd_sec)}', ticker=symbol,
                                       yTitle='Indexed Returns', asPlot=False, asFigure=True, showlegend=True,
                                       theme='white', auto_start=auto_start, auto_end=auto_end, connectgaps=False,
@@ -174,12 +280,16 @@ def update_graph(sltd_sec):
 # Histogram
 @app.callback(
     Output('sec-hist', 'figure'),
-    Input('sec-drpdwn', 'value')
+    [Input('sec-drpdwn', 'value'),
+    Input('intermediate-value1', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json1):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df3 = wdr_ticker(sltd_sec, start_date, end_date, source='stooq')
+            df3 = pd.read_json(json1, orient='split')
             ticker = sltd_sec
             df3.name = ticker
             Sec = Security(df3)
@@ -200,13 +310,16 @@ def update_graph(sltd_sec):
 # Correlations Network - Minimum Spanning Tree
 @app.callback(
     Output('corr-mst', 'figure'),
-    Input('sec-drpdwn2', 'value')
+    [Input('sec-drpdwn2', 'value'),
+    Input('intermediate-value2', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json2):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df4 = wdr_multi_ticker(sltd_sec, start_date, end_date,
-                                   source='stooq', price='Close')
+            df4 = pd.read_json(json2, orient='split')
             df4 = df4.pct_change().fillna(0).add(1).cumprod().mul(100)
 
             MST = plot_mst(df4, ann_factor=252, corr_threshold=0.05,
@@ -221,12 +334,16 @@ def update_graph(sltd_sec):
 # Realised Volatility
 @app.callback(
     Output('real-vol', 'figure'),
-    Input('sec-drpdwn', 'value')
+    [Input('sec-drpdwn', 'value'),
+    Input('intermediate-value1', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json1):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df5 = wdr_ticker(sltd_sec, start_date, end_date, source='stooq')
+            df5 = pd.read_json(json1, orient='split')
             ticker = sltd_sec
             df5.name = ticker
             Sec = Security(df5)
@@ -238,8 +355,10 @@ def update_graph(sltd_sec):
                         trading_periods=trading_periods, interval=interval)
             ann_factor, t, p = Sec.get_ann_factor(
                 interval, trading_periods, 24)
-            auto_start = Sec.df.index[Sec.df[f'Ann_Vol_{vol_window}_{p}'] > 0][0]
-            auto_end = Sec.df.index.max()
+            start_date = Sec.df.index[Sec.df[f'Ann_Vol_{vol_window}_{p}'] > 0][0]
+            auto_start = start_date
+            end_date = Sec.df.index.max()
+            auto_end = end_date
 
             vol_fig = pwe_return_dist_chart(Sec.df, start_date, end_date, tseries=f'Ann_Vol_{vol_window}_{p}', kind='scatter',
                                             title=f'Annualized {vol_window} {p} Volatility', ticker=f'{ticker} Vol.', yTitle=f'{ticker} Vol.',
@@ -254,13 +373,16 @@ def update_graph(sltd_sec):
 # Multi-Asset Box Plot
 @app.callback(
     Output('box-plt', 'figure'),
-    Input('sec-drpdwn2', 'value')
+    [Input('sec-drpdwn2', 'value'),
+    Input('intermediate-value2', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json2):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df6 = wdr_multi_ticker(sltd_sec, start_date, end_date,
-                                   source='stooq', price='Close')
+            df6 = pd.read_json(json2, orient='split')
             df6 = df6.pct_change()
             chart_interval, interval = calc_interval(df6)
             if interval in ['hourly', 'minutes', 'seconds']:
@@ -287,12 +409,16 @@ def update_graph(sltd_sec):
 # Yang-Zhang Volatility Estimator
 @app.callback(
     Output('yz-vol', 'figure'),
-    Input('sec-drpdwn', 'value')
+    [Input('sec-drpdwn', 'value'),
+    Input('intermediate-value1', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json1):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df7 = wdr_ticker(sltd_sec, start_date, end_date, source='stooq')
+            df7 = pd.read_json(json1, orient='split')
             ticker = sltd_sec
             df7.name = ticker
             Sec = Security(df7)
@@ -304,9 +430,10 @@ def update_graph(sltd_sec):
                 window=vol_window, trading_periods=trading_periods, clean=True, interval=interval)
             ann_factor, t, p = Sec.get_ann_factor(
                 interval, trading_periods, 24)
-            # auto_start = Sec.df['YangZhang{}_{}_Ann'.format(vol_window, p)].min()
-            auto_start = Sec.df.index[Sec.df[f'YangZhang{vol_window}_{p}_Ann'] > 0][0]
-            auto_end = Sec.df.index.max()
+            start_date = Sec.df.index[Sec.df[f'YangZhang{vol_window}_{p}_Ann'] > 0][0]
+            auto_start = start_date
+            end_date = Sec.df.index.max()
+            auto_end = end_date
 
             vz_fig = pwe_return_dist_chart(Sec.df, start_date, end_date, tseries=f'YangZhang{vol_window}_{p}_Ann', kind='scatter',
                                            title=f'Annualized Yang-Zhang {vol_window} {p} Vol.',
@@ -323,13 +450,16 @@ def update_graph(sltd_sec):
 # Correlation Matrix Heatmap
 @app.callback(
     Output('heatmap', 'figure'),
-    Input('sec-drpdwn2', 'value')
+    [Input('sec-drpdwn2', 'value'),
+    Input('intermediate-value2', 'data'),
+    # Input('dt-picker-range', 'start_date'),
+    # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec):
+def update_graph(sltd_sec, json2):
     if sltd_sec:
         if len(sltd_sec) > 0:
-            df8 = wdr_multi_ticker(sltd_sec, start_date, end_date,
-                                   source='stooq', price='Close')
+            df8 = pd.read_json(json2, orient='split')
             df_corr = df8.pct_change().corr()
             chart_interval, interval = calc_interval(df8)
             if interval in ['hourly', 'minutes', 'seconds']:
@@ -342,11 +472,13 @@ def update_graph(sltd_sec):
             else:
                 ticker = ''
                 chart_ticker = False
+            start_date = df8.index.min()
+            end_date = df8.index.max()
 
             hmap_fig = pwe_heatmap(df_corr, start_date=start_date, end_date=end_date, title=None, ticker=ticker, yTitle=None, xTitle=None, asPlot=False,
-                                  asFigure=True, theme='white', showlegend=False, decimals=2, textangle=0, file_tag=None,
-                                  interval='Daily', linecolor=None, title_dates=True, colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)', ],
-                                  title_time=title_time, chart_ticker=chart_ticker, top_margin=0.9, spacing=0.08, title_x=0.5, title_y=0.933)
+                                   asFigure=True, theme='white', showlegend=False, decimals=2, textangle=0, file_tag=None,
+                                   interval='Daily', linecolor=None, title_dates=True, colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)', ],
+                                   title_time=title_time, chart_ticker=chart_ticker, top_margin=0.9, spacing=0.08, title_x=0.5, title_y=0.933)
 
             return hmap_fig
 
