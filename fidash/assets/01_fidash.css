@@ -105,6 +105,7 @@ p {
 }
 
 .CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_3 {
+    font-family: var(--font-family) !important;
     box-sizing : border-box;
     cursor : pointer;
     font-size : 14px;
@@ -114,12 +115,14 @@ p {
     background : var(--pwe-darker) none repeat scroll 0% 0% / auto padding-box border-box !important;
 }
 .CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_3:hover {
+    font-family: var(--font-family) !important;
     background : var(--pwe-lighter) !important;
     border : 1px double var(--pwe-lighter) !important;
     color : rgb(255, 255, 255);
 }
 
 .CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_4 {
+    font-family: var(--font-family) !important;
     box-sizing : border-box;
     cursor : pointer;
     font-size : 14px;
@@ -129,12 +132,14 @@ p {
     background : var(--pwe-lighter) none repeat scroll 0% 0% / auto padding-box border-box !important;
 }
 .CalendarDay.CalendarDay_1.CalendarDay__default.CalendarDay__default_2.CalendarDay__selected_span.CalendarDay__selected_span_4:hover {
+    font-family: var(--font-family) !important;
     background : var(--pwe-lighter) !important;
     border : 1px double var(--pwe-lighter) !important;
     color : rgb(255, 255, 255);
 }
 
 .CalendarDay.CalendarDay__firstDayOfWeek.CalendarDay__selected_span {
+    font-family: var(--font-family) !important;
     box-sizing : border-box;
     cursor : pointer;
     font-size : 14px;
@@ -145,12 +150,14 @@ p {
 }
 
 .CalendarDay.CalendarDay__firstDayOfWeek.CalendarDay__selected_span:hover {
+    font-family: var(--font-family) !important;
     color : rgb(255, 255, 255);
     background : var(--pwe-lighter) !important;
     border : 1px double var(--pwe-lighter) !important;
 }
 
 .CalendarDay.CalendarDay__lastDayOfWeek.CalendarDay__selected_span {
+    font-family: var(--font-family) !important;
     box-sizing : border-box;
     cursor : pointer;
     font-size : 14px;
@@ -161,12 +168,14 @@ p {
 }
 
 .CalendarDay.CalendarDay__lastDayOfWeek.CalendarDay__selected_span:hover {
+    font-family: var(--font-family) !important;
     color : rgb(255, 255, 255);
     background : var(--pwe-lighter) !important;
     border : 1px double var(--pwe-lighter) !important;
 }
 
 .CalendarDay.CalendarDay__selected_start {
+    font-family: var(--font-family) !important;
     box-sizing : border-box;
     cursor : pointer;
     font-size : 14px;
@@ -177,12 +186,14 @@ p {
 }
 
 .CalendarDay.CalendarDay__selected_start:hover {
+    font-family: var(--font-family) !important;
     background : var(--pwe-lightest) !important;
     border : 1px double var(--pwe-lightest) !important;
     color : rgb(255, 255, 255);
 }
 
 .CalendarDay__selected_end {
+    font-family: var(--font-family) !important;
     box-sizing : border-box;
     cursor : pointer;
     font-size : 14px;
@@ -193,6 +204,7 @@ p {
 }
 
 .CalendarDay.CalendarDay__selected_end:hover {
+    font-family: var(--font-family) !important;
     background : var(--pwe-lightest) !important;
     border : 1px double var(--pwe-lightest) !important;
     color : rgb(255, 255, 255);
@@ -207,5 +219,12 @@ p {
     color : rgb(255, 255, 255); 
     position : absolute; 
     bottom : 0px; 
-    right : 5px; 
+    right : 5px;
+}
+
+.sec-alert.alert.alert-dark.alert-dismissible.show {
+    font-family: var(--font-family) !important;
+    font-size : 15px !important; 
+    color : rgb(255, 255, 255);
+    background : var(--pwe-grey) none repeat scroll 0% 0% / auto padding-box border-box !important;
 }

@@ -92,6 +92,7 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
     csv_end = pwe.dt_to_str(end_date)
 
     df_list = []
+    missing_secs = []
 
     for tkr in tkrs:
         file_path = os.path.abspath(
@@ -129,12 +130,15 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
                 df_list.append(df)
             else:
                 print (f"No data found for {tkr}")
+                missing_secs.append(tkr)
             
         # dfs = dfs.join(df)
         if df_list:
             dfs = pd.concat(df_list, axis=1)
+        else:
+            dfs = pd.DataFrame()
 
-    return dfs
+    return dfs, missing_secs
 
 def indexed_vals(df):
     return df.pct_change().fillna(0).add(1).cumprod().mul(100)
