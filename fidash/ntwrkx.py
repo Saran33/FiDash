@@ -83,7 +83,7 @@ def undirected_graph(edges):
 
 
 def set_corr_threshold(edges, threshold=0.5):
-    """Set the minium correlation threshold to reduce number of graph edges (for clarity)."""
+    """Set the minimum correlation threshold to reduce number of graph edges (for clarity)."""
 
     # Create new graph based on edge list
     Gx = nx.from_pandas_edgelist(

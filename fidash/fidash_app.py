@@ -28,9 +28,6 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],  # LUX, B
                             'content': 'width=device-width, initial-scale=1.0'}]  # meta tags for mobile view
                 )
 
-# alert = dbc.Alert(f"No data available for selected security", color="dark",  # {sltd_sec} dark danger
-#                   dismissable=True, duration=6000),  # use dismissable or duration=5000 for alert to close in x milliseconds
-
 # Dash Layout — https://hackerthemes.com/bootstrap-cheatsheet/
 app.layout = dbc.Container([
 
@@ -85,6 +82,20 @@ app.layout = dbc.Container([
                 persistence_type='session',  # session, local, or memory. Default is 'local'
                 updatemode='singledate'  # singledate or bothdates. Select when callback is triggered
             ),
+            dcc.Checklist(id='candle_checklist',
+                          options=[
+                              {'label': 'Legend', 'value': 'showlegend'},
+                              {'label': 'Volume', 'value': 'showvol'},
+                              {'label': 'Boll. Bands', 'value': 'showboll'},
+                              {'label': 'RSI', 'value': 'showrsi'},
+                              {'label': 'AMA', 'value': 'showama'},
+                              {'label': 'Kalman Filter', 'value': 'showkal'},
+                          ],
+                          value=['showvol'],
+                          labelStyle={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px", "color": "rgb(51, 51, 51)"},
+                          inputStyle = {'background-color': 'rgb(220, 187, 166)'},
+                          className='candle_checklist', inputClassName="checkbox", persistence=True, persistence_type='session',
+                          ),
             dcc.Graph(id='cand-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                                                         # 'modeBarButtonsToRemove': ['pan2d','select2d'], modeBarButtonsToAdd
                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False})
@@ -100,6 +111,7 @@ app.layout = dbc.Container([
                          persistence=True, persistence_type='session',
                          ),
             dcc.Store(id='intermediate-value2'),
+            dcc.Store(id='avlbl-sec-list'),
             dcc.Graph(id='line-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
         ],  # width={'size':5, 'offset':0, 'order':2},
@@ -117,6 +129,14 @@ app.layout = dbc.Container([
         ),
 
         dbc.Col([
+            html.Div([
+            dcc.Input(id="mst_corr_thrsld", type="number", placeholder="0.05", value=float(0.05), debounce=True, required=False, min=float(0.0), max=float(1.0), step=float(0.05),
+            inputMode='numeric', persistence=True, persistence_type='session', className='mst_corr_thrsld', # pattern='/^\d+$/',
+            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
+            html.P('minimum correlation threshold', id="mst_corr_thrsld_text", lang="en", className="mst_corr_thrsld_text",
+            title="Set the minimum correlation threshold to reduce number of graph edges in the minimum spanning tree (between 0 and 1).",
+            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
+            ]),
             dcc.Graph(id='corr-mst', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
         ],  # width={'size':5, 'offset':0, 'order':2},
@@ -126,6 +146,14 @@ app.layout = dbc.Container([
 
     dbc.Row([
         dbc.Col([
+            html.Div([
+            dcc.Input(id="vol_window", type="number", placeholder="30", value=30, debounce=True, required=False, min=2, max=10000000000, step=1,
+            inputMode='numeric', pattern='/^\d+$/', persistence=True, persistence_type='session', className='vol_window',
+            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
+            html.P('period rolling window', id="vol_window_text", lang="en", className="vol_window_text",
+            title="Number of periods in the rolling window used to calculate the realised volatility.",
+            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
+            ]),
             dcc.Graph(id='real-vol', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
         ],  # width={'size':5, 'offset':1},
@@ -142,6 +170,14 @@ app.layout = dbc.Container([
 
     dbc.Row([
         dbc.Col([
+            html.Div([
+            dcc.Input(id="yz_window", type="number", placeholder="30", value=30, debounce=True, required=False, min=2, max=10000000000, step=1,
+            inputMode='numeric', pattern='/^\d+$/', persistence=True, persistence_type='session', className='yz_window',
+            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
+            html.P('period rolling window', id="yz_window_text", lang="en", className="yz_window_text",
+            title="Number of periods in the rolling window used to calculate Yang-Zhang Volatility Estimator.",
+            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
+            ]),
             dcc.Graph(id='yz-vol', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
         ],  # width={'size':5, 'offset':1},
@@ -162,7 +198,7 @@ app.layout = dbc.Container([
 # Callbacks (connect components)
 # --------------------------------------------
 # Load single security dataframe
-@app.callback(
+@ app.callback(
     [Output('intermediate-value1', 'data'),
      Output("sec-alert", "children")],
     [Input('sec-drpdwn', 'value'),
@@ -205,9 +241,10 @@ def get_data1(sltd_sec, start_date, end_date):
 
 
 # Load multi-security dataframe
-@app.callback(
+@ app.callback(
     [Output('intermediate-value2', 'data'),
-     Output("multi-sec-alert", "children")],
+     Output('avlbl-sec-list', 'data'),
+     Output("multi-sec-alert", 'children')],
     [Input('sec-drpdwn2', 'value'),
      Input('dt-picker-range', 'start_date'),
      Input('dt-picker-range', 'end_date')]
@@ -215,6 +252,7 @@ def get_data1(sltd_sec, start_date, end_date):
 def get_data2(sltd_sec, start_date, end_date):
     if sltd_sec:
         if len(sltd_sec) > 0:
+            print(sltd_sec)
             start_date = str_to_dt(start_date, dayfirst=False)
             if start_date.tzinfo == None:
                 start_date = to_utc(start_date)
@@ -230,36 +268,42 @@ def get_data2(sltd_sec, start_date, end_date):
                 df2, missing_secs = wdr_multi_ticker(sltd_sec, start_date,
                                                      end_date, source='stooq', price='Close')
                 print(missing_secs)
+                if missing_secs:
+                    avlbl_sec_lst = [
+                        x for x in sltd_sec if x not in missing_secs]
+                    print(avlbl_sec_lst)
+                else:
+                    avlbl_sec_lst = sltd_sec
                 alert = dbc.Alert(f"No data available for {ext_str_lst(missing_secs)}", color="dark",  # dark danger
                                   dismissable=True, duration=6000, class_name="sec-alert", fade=True)
                 if df2.empty:
-                    return dash.no_update, alert
+                    return dash.no_update, avlbl_sec_lst, alert
                 else:
                     json2 = df2.to_json(date_format='iso', orient='split')
 
                 if missing_secs:
-                    return json2, alert
-
+                    return json2, avlbl_sec_lst, alert
             except:
                 print("Error reading data from API")
                 raise dash.exceptions.PreventUpdate
 
-            return json2, dash.no_update
+            return json2, avlbl_sec_lst, dash.no_update
 
     elif (not sltd_sec) or (len(sltd_sec) == 0):
         raise dash.exceptions.PreventUpdate
 
 
-# Line chart - Single
+# Candle chart
 @ app.callback(
     Output('cand-fig', 'figure'),
     [Input('sec-drpdwn', 'value'),
      Input('intermediate-value1', 'data'),
+     Input('candle_checklist', 'value')
      # Input('dt-picker-range', 'start_date'),
      # Input('dt-picker-range', 'end_date')
      ]
 )
-def update_graph(sltd_sec, json1):
+def update_graph(sltd_sec, json1, quant_studies):
     if sltd_sec:
         if len(sltd_sec) > 0:
             if json1 != None:
@@ -275,13 +319,23 @@ def update_graph(sltd_sec, json1):
                     #                             title=f'{ticker} - {srt_start}:{srt_end}', ticker=ticker, yTitle='USD', showlegend=False,
                     #                             theme='white', auto_start=srt_start, auto_end=None, connectgaps=False, annots=None, annot_col=None)
 
+                    # if 'showlegend' in quant_studies:
+                    #     showlegend = True
+                    # else:
+                    #     showlegend = False
+                    showlegend = True if 'showlegend' in quant_studies else False
+                    showvol = True if 'showvol' in quant_studies else False
+                    showboll = True if 'showboll' in quant_studies else False
+                    showrsi = True if 'showrsi' in quant_studies else False
+                    showama = True if 'showama' in quant_studies else False
+                    showkal = True if 'showkal' in quant_studies else False
+
                     plt_int = quant_chart(df1, start_date, end_date, ticker=ticker, title=None, theme='white', auto_start=auto_start, auto_end=auto_end,
-                                          asPlot=False, asFigure=True, showlegend=False, boll_std=2, boll_periods=20, showboll=False, showrsi=False,
-                                          rsi_periods=14, showama=False, ama_periods=9, showvol=True, show_range=False, annots=None, textangle=0,
+                                          asPlot=False, asFigure=True, showlegend=showlegend, boll_std=2, boll_periods=20, showboll=showboll, showrsi=showrsi,
+                                          rsi_periods=14, showama=showama, ama_periods=9, showvol=showvol, show_range=False, annots=None, textangle=0,
                                           file_tag=None, support=None, resist=None, annot_font_size=6, title_dates=False, title_time=False,
                                           chart_ticker=True, top_margin=0.9, spacing=0.08, range_fontsize=9.8885, title_x=0.5,
-                                          title_y=0.933, arrowhead=6, arrowlen=-50)
-
+                                          title_y=0.933, arrowhead=6, arrowlen=-50, showkal=showkal)
                     return plt_int
 
                 else:
@@ -296,36 +350,46 @@ def update_graph(sltd_sec, json1):
 # Line chart - multiple
 @ app.callback(
     Output('line-fig', 'figure'),
-    [Input('sec-drpdwn2', 'value'),
-     Input('intermediate-value2', 'data'),
-     # Input('dt-picker-range', 'start_date'),
-     # Input('dt-picker-range', 'end_date')
-     ]
+    [
+        # Input('sec-drpdwn2', 'value'),
+        Input('intermediate-value2', 'data'),
+        Input('avlbl-sec-list', 'data'),
+        # Input('dt-picker-range', 'start_date'),
+        # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec, json2):
-    if sltd_sec:
-        if len(sltd_sec) > 0:
+def update_graph(json2, avlbl_sec_lst):
+    if avlbl_sec_lst:
+        if len(avlbl_sec_lst) > 0:
             if json2 != None:
                 df2 = pd.read_json(json2, orient='split')
-                df2 = indexed_vals(df2)
-                start_date = df2.index.min()
-                auto_start = start_date
-                end_date = df2.index.max()
-                auto_end = end_date
-                symbol = ''
+                if not df2.empty:
+                    df2 = indexed_vals(df2)
+                    start_date = df2.index.min()
+                    auto_start = start_date
+                    end_date = df2.index.max()
+                    auto_end = end_date
+                    symbol = ''
+                    if len(avlbl_sec_lst) > 7:
+                        showlegend = False
+                        # title = ''
+                        title = 'Performance Comparison'
+                    else:
+                        showlegend = True
+                        title = f'{ext_str_lst(avlbl_sec_lst)}'
 
-                comp_lc1 = pwe_line_chart(df2, columns=sltd_sec, start_date=start_date, end_date=end_date,
-                                        kind='scatter', title=f'{ext_str_lst(sltd_sec)}', ticker=symbol,
-                                        yTitle='Indexed Returns', asPlot=False, asFigure=True, showlegend=True,
-                                        theme='white', auto_start=auto_start, auto_end=auto_end, connectgaps=False,
-                                        file_tag=None, chart_ticker=False, annots=None)
-                return comp_lc1
+                    comp_lc1 = pwe_line_chart(df2, columns=avlbl_sec_lst, start_date=start_date, end_date=end_date,
+                                              kind='scatter', title=title, ticker=symbol,
+                                              yTitle='Indexed Returns', asPlot=False, asFigure=True, showlegend=showlegend,
+                                              theme='white', auto_start=auto_start, auto_end=auto_end, connectgaps=False,
+                                              file_tag=None, chart_ticker=False, annots=None)
+                    return comp_lc1
+                else:
+                    raise dash.exceptions.PreventUpdate
             else:
                 raise dash.exceptions.PreventUpdate
-        else:
-            raise dash.exceptions.PreventUpdate
 
-    elif (not sltd_sec) or (len(sltd_sec) == 0):
+    elif (not avlbl_sec_lst) or (len(avlbl_sec_lst) == 0):
         raise dash.exceptions.PreventUpdate
 
 
@@ -369,29 +433,45 @@ def update_graph(sltd_sec, json1):
 # Correlations Network - Minimum Spanning Tree
 @ app.callback(
     Output('corr-mst', 'figure'),
-    [Input('sec-drpdwn2', 'value'),
-     Input('intermediate-value2', 'data'),
-     # Input('dt-picker-range', 'start_date'),
-     # Input('dt-picker-range', 'end_date')
-     ]
+    [
+        # Input('sec-drpdwn2', 'value'),
+        Input('intermediate-value2', 'data'),
+        Input('avlbl-sec-list', 'data'),
+        Input('mst_corr_thrsld', 'value'),
+        # Input('dt-picker-range', 'start_date'),
+        # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec, json2):
-    if sltd_sec:
-        if len(sltd_sec) > 0:
+def update_graph(json2, avlbl_sec_lst, corr_thrsld):
+    if avlbl_sec_lst:
+        if len(avlbl_sec_lst) > 0:
             if json2 != None:
-                df4 = pd.read_json(json2, orient='split')
-                df4 = df4.pct_change().fillna(0).add(1).cumprod().mul(100)
+                try:
+                    corr_thrsld = float(corr_thrsld)
+                except:
+                    raise dash.exceptions.PreventUpdate
+                if (corr_thrsld <= 1) and (corr_thrsld >= 0):
+                    df4 = pd.read_json(json2, orient='split')
+                    if not df4.empty:
+                        df4 = df4.pct_change().fillna(0).add(1).cumprod().mul(100)
+                        chart_interval, interval = calc_interval(df4)
+                        df4.name = "MST"
+                        Sec = Security(df4)
+                        trading_periods = 252
+                        ann_factor, t, p = Sec.get_ann_factor(interval, trading_periods, 24)
 
-                MST = plot_mst(df4, ann_factor=252, corr_threshold=0.05,
-                            node_size_factor=10, savefig=True)
+                        MST = plot_mst(df4, ann_factor=ann_factor, corr_threshold=corr_thrsld,
+                                    node_size_factor=10, savefig=True)
 
-                return MST
+                        return MST
+                    else:
+                        raise dash.exceptions.PreventUpdate
+                else:
+                    raise dash.exceptions.PreventUpdate
             else:
                 raise dash.exceptions.PreventUpdate
-        else:
-            raise dash.exceptions.PreventUpdate
 
-    elif (not sltd_sec) or (len(sltd_sec) == 0):
+    elif (not avlbl_sec_lst) or (len(avlbl_sec_lst) == 0):
         raise dash.exceptions.PreventUpdate
 
 
@@ -400,11 +480,12 @@ def update_graph(sltd_sec, json2):
     Output('real-vol', 'figure'),
     [Input('sec-drpdwn', 'value'),
      Input('intermediate-value1', 'data'),
+     Input('vol_window', 'value'),
      # Input('dt-picker-range', 'start_date'),
      # Input('dt-picker-range', 'end_date')
      ]
 )
-def update_graph(sltd_sec, json1):
+def update_graph(sltd_sec, json1, vol_window):
     if sltd_sec:
         if len(sltd_sec) > 0:
             if json1 != None:
@@ -415,7 +496,7 @@ def update_graph(sltd_sec, json1):
                     Sec = Security(df5)
                     Sec.get_returns(price='Close')
                     chart_interval, interval = calc_interval(Sec.df)
-                    vol_window = 30
+                    # vol_window = 30
                     trading_periods = 252
                     Sec.get_vol(window=vol_window, returns='Price_Returns',
                                 trading_periods=trading_periods, interval=interval)
@@ -443,41 +524,44 @@ def update_graph(sltd_sec, json1):
 # Multi-Asset Box Plot
 @ app.callback(
     Output('box-plt', 'figure'),
-    [Input('sec-drpdwn2', 'value'),
-     Input('intermediate-value2', 'data'),
-     # Input('dt-picker-range', 'start_date'),
-     # Input('dt-picker-range', 'end_date')
-     ]
+    [
+        # Input('sec-drpdwn2', 'value'),
+        Input('intermediate-value2', 'data'),
+        Input('avlbl-sec-list', 'data'),
+        # Input('dt-picker-range', 'start_date'),
+        # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec, json2):
-    if sltd_sec:
-        if len(sltd_sec) > 0:
+def update_graph(json2, avlbl_sec_lst):
+    if avlbl_sec_lst:
+        if len(avlbl_sec_lst) > 0:
             if json2 != None:
                 df6 = pd.read_json(json2, orient='split')
-                df6 = df6.pct_change()
-                chart_interval, interval = calc_interval(df6)
-                if interval in ['hourly', 'minutes', 'seconds']:
-                    title_time = True
-                else:
-                    title_time = False
-                if len(df6.columns) < 4:
-                    ticker = ext_str_lst(df6.columns)
-                    chart_ticker = True
-                else:
-                    ticker = ''
-                    chart_ticker = False
+                if not df6.empty:
+                    df6 = df6.pct_change()
+                    chart_interval, interval = calc_interval(df6)
+                    if interval in ['hourly', 'minutes', 'seconds']:
+                        title_time = True
+                    else:
+                        title_time = False
+                    if len(df6.columns) < 4:
+                        ticker = ext_str_lst(df6.columns)
+                        chart_ticker = True
+                    else:
+                        ticker = ''
+                        chart_ticker = False
 
-                box_fig = pwe_box(df6, title=f'{chart_interval} Returns', ticker=ticker, yTitle='Returns (%)', xTitle='Returns Distribution', asPlot=True, theme='white',
-                                showlegend=False, decimals=2, orientation='v', textangle=0, file_tag=None, chart_ticker=chart_ticker,
-                                interval='Daily', yaxis_tickformat='.2%', xaxis_tickformat='.2%', linecolor=None, title_dates='Yes', title_time=title_time)
+                    box_fig = pwe_box(df6, title=f'{chart_interval} Returns', ticker=ticker, yTitle='Returns (%)', xTitle='Returns Distribution', asPlot=True, theme='white',
+                                      showlegend=False, decimals=2, orientation='v', textangle=0, file_tag=None, chart_ticker=chart_ticker,
+                                      interval='Daily', yaxis_tickformat='.2%', xaxis_tickformat='.2%', linecolor=None, title_dates='Yes', title_time=title_time)
 
-                return box_fig
+                    return box_fig
+                else:
+                    raise dash.exceptions.PreventUpdate
             else:
                 raise dash.exceptions.PreventUpdate
-        else:
-            raise dash.exceptions.PreventUpdate
 
-    elif (not sltd_sec) or (len(sltd_sec) == 0):
+    elif (not avlbl_sec_lst) or (len(avlbl_sec_lst) == 0):
         raise dash.exceptions.PreventUpdate
 
 
@@ -486,11 +570,12 @@ def update_graph(sltd_sec, json2):
     Output('yz-vol', 'figure'),
     [Input('sec-drpdwn', 'value'),
      Input('intermediate-value1', 'data'),
+     Input('yz_window', 'value'),
      # Input('dt-picker-range', 'start_date'),
      # Input('dt-picker-range', 'end_date')
      ]
 )
-def update_graph(sltd_sec, json1):
+def update_graph(sltd_sec, json1, yz_window):
     if sltd_sec:
         if len(sltd_sec) > 0:
             if json1 != None:
@@ -501,19 +586,18 @@ def update_graph(sltd_sec, json1):
                     Sec = Security(df7)
                     Sec.get_returns(price='Close')
                     chart_interval, interval = calc_interval(Sec.df)
-                    vol_window = 30
                     trading_periods = 252
                     Sec.YangZhang_estimator(
-                        window=vol_window, trading_periods=trading_periods, clean=True, interval=interval)
+                        window=yz_window, trading_periods=trading_periods, clean=True, interval=interval)
                     ann_factor, t, p = Sec.get_ann_factor(
                         interval, trading_periods, 24)
-                    start_date = Sec.df.index[Sec.df[f'YangZhang{vol_window}_{p}_Ann'] > 0][0]
+                    start_date = Sec.df.index[Sec.df[f'YangZhang{yz_window}_{p}_Ann'] > 0][0]
                     auto_start = start_date
                     end_date = Sec.df.index.max()
                     auto_end = end_date
 
-                    vz_fig = pwe_return_dist_chart(Sec.df, start_date, end_date, tseries=f'YangZhang{vol_window}_{p}_Ann', kind='scatter',
-                                                   title=f'Annualized Yang-Zhang {vol_window} {p} Vol.',
+                    vz_fig = pwe_return_dist_chart(Sec.df, start_date, end_date, tseries=f'YangZhang{yz_window}_{p}_Ann', kind='scatter',
+                                                   title=f'Annualized Yang-Zhang {yz_window} {p} Vol.',
                                                    ticker=f'{ticker} YZ Vol.', yTitle=f'{ticker} YZ Vol.',
                                                    asPlot=False, asFigure=True, showlegend=False, theme='white',
                                                    auto_start=auto_start, auto_end=auto_end,
@@ -531,44 +615,47 @@ def update_graph(sltd_sec, json1):
 # Correlation Matrix Heatmap
 @ app.callback(
     Output('heatmap', 'figure'),
-    [Input('sec-drpdwn2', 'value'),
-     Input('intermediate-value2', 'data'),
-     # Input('dt-picker-range', 'start_date'),
-     # Input('dt-picker-range', 'end_date')
-     ]
+    [
+        # Input('sec-drpdwn2', 'value'),
+        Input('intermediate-value2', 'data'),
+        Input('avlbl-sec-list', 'data'),
+        # Input('dt-picker-range', 'start_date'),
+        # Input('dt-picker-range', 'end_date')
+    ]
 )
-def update_graph(sltd_sec, json2):
-    if sltd_sec:
-        if len(sltd_sec) > 0:
+def update_graph(json2, avlbl_sec_lst):
+    if avlbl_sec_lst:
+        if len(avlbl_sec_lst) > 0:
             if json2 != None:
                 df8 = pd.read_json(json2, orient='split')
-                df_corr = df8.pct_change().corr()
-                chart_interval, interval = calc_interval(df8)
-                if interval in ['hourly', 'minutes', 'seconds']:
-                    title_time = True
-                else:
-                    title_time = False
-                if len(df8.columns) < 4:
-                    ticker = ext_str_lst(df8.columns)
-                    chart_ticker = True
-                else:
-                    ticker = ''
-                    chart_ticker = False
-                start_date = df8.index.min()
-                end_date = df8.index.max()
+                if not df8.empty:
+                    df_corr = df8.pct_change().corr()
+                    chart_interval, interval = calc_interval(df8)
+                    if interval in ['hourly', 'minutes', 'seconds']:
+                        title_time = True
+                    else:
+                        title_time = False
+                    if len(df8.columns) < 4:
+                        ticker = ext_str_lst(df8.columns)
+                        chart_ticker = True
+                    else:
+                        ticker = ''
+                        chart_ticker = False
+                    start_date = df8.index.min()
+                    end_date = df8.index.max()
 
-                hmap_fig = pwe_heatmap(df_corr, start_date=start_date, end_date=end_date, title=None, ticker=ticker, yTitle=None, xTitle=None, asPlot=False,
-                                    asFigure=True, theme='white', showlegend=False, decimals=2, textangle=0, file_tag=None,
-                                    interval='Daily', linecolor=None, title_dates=True, colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)', ],
-                                    title_time=title_time, chart_ticker=chart_ticker, top_margin=0.9, spacing=0.08, title_x=0.5, title_y=0.933)
+                    hmap_fig = pwe_heatmap(df_corr, start_date=start_date, end_date=end_date, title='Correlation Heatmap', ticker=ticker, yTitle=None, xTitle=None, asPlot=False,
+                                           asFigure=True, theme='white', showlegend=False, decimals=2, textangle=0, file_tag=None,
+                                           interval='Daily', linecolor=None, title_dates=True, colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)', ],
+                                           title_time=title_time, chart_ticker=chart_ticker, top_margin=0.9, spacing=0.08, title_x=0.5, title_y=0.933)
 
-                return hmap_fig
+                    return hmap_fig
+                else:
+                    raise dash.exceptions.PreventUpdate
             else:
                 raise dash.exceptions.PreventUpdate
-        else:
-            raise dash.exceptions.PreventUpdate
 
-    elif (not sltd_sec) or (len(sltd_sec) == 0):
+    elif (not avlbl_sec_lst) or (len(avlbl_sec_lst) == 0):
         raise dash.exceptions.PreventUpdate
 
 

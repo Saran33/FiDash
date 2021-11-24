@@ -15,8 +15,16 @@
     --pwe-lighter: rgb(229, 205, 191) !important;
     --pwe-skin: rgb(220, 187, 166) !important;
     --pwe-darker: rgb(211, 171, 149) !important;
+    --pwe-darkest: #C48E71 !important;
     --pwe-grey: #64646F !important;
+    --pwe-lgrey: #7D7D89 !important;
     --pwe-blue: #a4b3c1 !important;
+    --pwe-dark_blue: #869AAC !important;
+    --vic-teal: #d1d3d4 !important;
+    --pwe-teal: #99B7BD !important;
+    --pwe-teal2: #b6b6b6 !important;
+    --pwe-light-teal: #b8cdd1 !important;
+    --pwe-ig-lgrey: #58595b !important;
     --font-family : Roboto, sans-serif !important;
 
 }
@@ -227,4 +235,164 @@ p {
     font-size : 15px !important; 
     color : rgb(255, 255, 255);
     background : var(--pwe-grey) none repeat scroll 0% 0% / auto padding-box border-box !important;
+}
+
+.dash-debug-menu.dash-debug-menu--closed {
+    transition : all 0.3s ease 0s;
+    position : fixed;
+    bottom : 35px;
+    right : 35px;
+    display : flex;
+    justify-content : center;
+    align-items : center;
+    z-index : 10001;
+    background-color : var(--pwe-skin) !important;
+    border-radius : 100%;
+    width : 64px;
+    height : 64px;
+    cursor : pointer;
+}
+
+.dash-debug-menu.dash-debug-menu--closed:hover {
+    background-color : var(--pwe-darker) !important;
+}
+
+.dash-debug-menu.dash-debug-menu--open {
+    transition : all 0.3s ease 0s;
+    position : fixed;
+    bottom : 35px;
+    right : 35px;
+    display : flex;
+    justify-content : center;
+    align-items : center;
+    z-index : 10001;
+    background-color : var(--pwe-darker) !important;
+    border-radius : 100%;
+    width : 64px;
+    height : 64px;
+    cursor : pointer;
+    transform : matrix(-1, -1.22465e-16, 1.22465e-16, -1, 0, 0);
+}
+
+.dash-debug-menu.dash-debug-menu--open:hover {
+    background-color : var(--pwe-darkest) !important;
+}
+
+.dash-debug-menu__button.dash-debug-menu__button--available {
+    position : relative;
+    background-color : var(--pwe-light-teal) !important;
+    border-radius : 100%;
+    width : 64px;
+    height : 64px;
+    font-size : 10px;
+    display : flex;
+    flex-direction : column;
+    justify-content : center;
+    align-items : center;
+    transition : background-color 0.2s ease 0s;
+    color : rgb(255, 255, 255);
+    cursor : default;
+}
+
+.dash-debug-menu__button.dash-debug-menu__button--available:hover {
+    background-color : var(--pwe-teal) !important;
+    cursor : default;
+}
+
+.dash-debug-menu__button.dash-debug-menu__button--errors.dash-debug-menu__button--enabled {
+    position : relative;
+    background-color : var(--pwe-blue) !important;
+    border-radius : 100%;
+    width : 64px;
+    height : 64px;
+    font-size : 10px;
+    display : flex;
+    flex-direction : column;
+    justify-content : center;
+    align-items : center;
+    transition : background-color 0.2s ease 0s;
+    color : rgb(255, 255, 255);
+    cursor : pointer;   
+}
+
+.dash-debug-menu__button.dash-debug-menu__button--errors.dash-debug-menu__button--enabled:hover {
+    background-color : var(--pwe-dark_blue) !important;
+}
+
+.dash-debug-menu__button.dash-debug-menu__button--callbacks {
+    position : relative;
+    background-color : var(--pwe-lgrey) !important;
+    border-radius : 100%;
+    width : 64px;
+    height : 64px;
+    font-size : 10px;
+    display : flex;
+    flex-direction : column;
+    justify-content : center;
+    align-items : center;
+    transition : background-color 0.2s ease 0s;
+    color : rgb(255, 255, 255);
+    cursor : pointer;
+}
+
+.dash-debug-menu__button.dash-debug-menu__button--callbacks:hover {
+    background-color : var(--pwe-grey) !important;
+}
+
+
+.candle_checklist {
+    font-size : 15px !important; 
+    padding : 2px 3px 2px 2.47px !important;
+    font-family: var(--font-family) !important;
+}
+
+.checkbox {
+    width: 11px;
+    height: 11px;
+    margin-right: 2.36px;
+    background-color : var(--pwe-skin) !important;
+    color : var(--pwe-skin) !important;
+}
+
+.vol_window {
+    width: 53px !important;
+    height: 20.2px !important;
+    font-family: var(--font-family) !important;
+    font-size : 15px !important;
+    color : rgb(51, 51, 51) !important;
+}
+
+.vol_window_text {
+    font-size : 15px !important;
+    font-family: var(--font-family) !important;
+    color : rgb(51, 51, 51) !important;
+}
+
+.yz_window {
+    width: 53px !important;
+    height: 20.2px !important;
+    font-family: var(--font-family) !important;
+    font-size : 15px !important;
+    color : rgb(51, 51, 51) !important;
+}
+
+.yz_window_text {
+    font-size : 15px !important;
+    font-family: var(--font-family) !important;
+    color : rgb(51, 51, 51) !important;
+}
+
+.mst_corr_thrsld
+ {
+    width: 53px !important;
+    height: 20.2px !important;
+    font-family: var(--font-family) !important;
+    font-size : 15px !important;
+    color : rgb(51, 51, 51) !important;     
+ }
+
+.mst_corr_thrsld_text {
+    font-size : 15px !important;
+    font-family: var(--font-family) !important;
+    color : rgb(51, 51, 51) !important;
 }

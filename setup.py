@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name='fidash',
     packages=find_packages(include=['fidash']),
-    version='0.11',
+    version='0.2',
     author='Saran Connolly',
     description='PWE Capital Finance dashboard.',
     long_description=long_description,
@@ -25,6 +25,7 @@ setup(
         'TickerScrape @ git+git://github.com/Saran33/TickerScrape.git',
         'yahoo_fin', 'yfinance', 'pandas-datareader', 'dash', 'dash-datetimepicker',
         'dash-bootstrap-components', 'SQLAlchemy', 'matplotlib', 'seaborn', 'networkx',
+        'pykalman',
 
     ],
     #package_dir={"": "src"},

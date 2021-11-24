@@ -231,19 +231,24 @@ def get_chart_title(title, chart_ticker, title_dates, ticker, chart_dates):
             chart_title = ''
     return chart_title
 
-
 PWE_skin = "#DCBBA6" # "rgb(220,187,166)"
 skin_lighter = "#E5CDBF" # "rgb(229,205,191)"
 skin_lightest = "#EDDDD5" # "rgb(237,221,213)"
 skin_darker = "#d3ab95" # "rgb(211,171,149)"
+pwe_darkest = "#C48E71"
 black = "#000000"
 PWE_grey = "#64646F"
+PWE_lgrey = "#7D7D89"
 PWE_blue = "#a4b3c1"
+PWE_dark_blue = "#869AAC"
 ironsidegrey = "#6F6F64"
 PWE_light_grey = "#a5a5a5"
 PWE_ig_light_grey = '#58595b'
 PWE_ig_dark_grey = '#403d3e'
 vic_teal = '#d1d3d4'
+pwe_teal = '#99B7BD'
+pwe_light_teal = '#b8cdd1'
+pwe_teal2 = '#b6b6b6'
 PWE_black = '#231f20'
 
 transparent = '#DCBBA600'
@@ -403,8 +408,8 @@ def pwe_format(f_name):
 
 def quant_chart(df, start_date, end_date, ticker=None, title=None, theme='henanigans', auto_start=None, auto_end=None,
                 asPlot=False, asFigure=True, showlegend=True, boll_std=2, boll_periods=20, showboll=False, showrsi=False, rsi_periods=14,
-                showama=False, ama_periods=9, showvol=False, show_range=False, annots=None, textangle=0, file_tag=None,
-                support=None, resist=None, annot_font_size=6, title_dates=False, title_time=False, chart_ticker=True,
+                showama=False, ama_periods=9, showvol=False, showkal=False, kal_periods=1, show_range=False, annots=None, textangle=0,
+                file_tag=None, support=None, resist=None, annot_font_size=6, title_dates=False, title_time=False, chart_ticker=True,
                 top_margin=0.9, spacing=0.08, range_fontsize=9.8885, title_x=0.5, title_y=0.933,
                 arrowhead=6, arrowlen=-50):
     """
@@ -493,23 +498,23 @@ def quant_chart(df, start_date, end_date, ticker=None, title=None, theme='henani
     if showboll == True:
         qf.add_bollinger_bands(periods=boll_periods, boll_std=boll_std, colors=[
                                'black', PWE_skin_38], fill=True, name=f"BOLL({boll_std},{boll_periods})")
-    else:
-        pass
+
     qf.layout.update(showlegend=showlegend)
     if showama == True:
         qf.add_ama(periods=ama_periods, width=2, color=[
                    PWE_blue, vic_teal], legendgroup=False)
-    else:
-        pass
+
+    if showkal == True:
+        qf.add_kalman(periods=kal_periods, width=2, column='Close', color=[
+                   pwe_light_teal, pwe_teal], legendgroup=False)
+
     if showrsi == True:
         qf.add_rsi(periods=rsi_periods, color=PWE_skin, legendgroup=False)
-    else:
-        pass
+
     if showvol == True:
         qf.add_volume(datalegend=True, legendgroup=True,
                       name="Volume", showlegend=False, up_color=PWE_grey)
-    else:
-        pass
+
 
     # for trace in qf['data']:
     #    if(trace == 'Volume'): trace['datalegend'] = False
@@ -681,8 +686,8 @@ def pwe_line_chart(df, start_date, end_date, columns=None, kind='scatter', title
         arrowcolor = PWE_ig_light_grey
         style = theme
 
-    colors = [PWE_skin, PWE_grey, black, vic_teal, PWE_blue,
-                skin_darker, PWE_ig_light_grey, skin_lighter, PWE_ig_dark_grey]
+    colors = [PWE_skin, PWE_grey, black, pwe_light_teal, PWE_blue,
+                skin_darker, PWE_ig_light_grey, skin_lighter, PWE_ig_dark_grey, pwe_darkest, PWE_lgrey, PWE_black, pwe_teal, PWE_dark_blue, vic_teal]
 
     chart_start, chart_end, auto_start, auto_end = get_chart_dates(
         df=df, start_date=None, end_date=None, utc=True, auto_start=auto_start, auto_end=auto_end)
@@ -1115,10 +1120,12 @@ def pwe_box(df, start_date=None, end_date=None, title=None, ticker=None, yTitle=
 
     # colors = [PWE_skin, PWE_grey, black, vic_teal,
     #           PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey,]
-    colors = [PWE_skin, PWE_grey, black, vic_teal,
-              PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey, skin_darker, skin_lighter]
     # colors = [PWE_skin, PWE_grey, black, vic_teal, PWE_blue,
     #             skin_darker, PWE_ig_light_grey, PWE_ig_dark_grey, skin_lighter]
+    # colors = [PWE_skin, PWE_grey, black, vic_teal,
+    #           PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey, skin_darker, skin_lighter]
+    colors = [PWE_skin, PWE_grey, black, pwe_light_teal, PWE_blue,
+                PWE_ig_light_grey, PWE_ig_dark_grey, skin_darker, PWE_lgrey, PWE_black, pwe_teal, PWE_dark_blue, vic_teal, skin_lighter, pwe_darkest,]
 
     sdate, edate, chart_dates = chart_file_dates(
         df, start_date, end_date, time=title_time)
@@ -1580,7 +1587,7 @@ def pwe_heatmap(df, start_date=None, end_date=None, title=None, ticker=None, yTi
         df, start_date, end_date, time=title_time)
 
     if xTitle == None:
-        xTitle = f'{interval} Return Correlation'
+        xTitle = f'{interval} Return Correlation Matrix'
 
     check_folder('charts')
 
