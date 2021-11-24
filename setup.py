@@ -25,7 +25,8 @@ setup(
         'TickerScrape @ git+git://github.com/Saran33/TickerScrape.git',
         'yahoo_fin', 'yfinance', 'pandas-datareader', 'dash', 'dash-datetimepicker',
         'dash-bootstrap-components', 'SQLAlchemy', 'matplotlib', 'seaborn', 'networkx',
-        'pykalman',
+        'pykalman', 'Flask-SQLAlchemy',
+        'flask-login @ git+git://github.com/maxcountryman/flask-login',
 
     ],
     #package_dir={"": "src"},

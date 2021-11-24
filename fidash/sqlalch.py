@@ -38,3 +38,5 @@ def all_tickers():
         symbols = df['Ticker']
         labels = df['Label']
     return labels, symbols
+
+

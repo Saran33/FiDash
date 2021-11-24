@@ -3,7 +3,7 @@ import dash
 from dash import dcc
 # import dash_html_components as html
 from dash import html
-from dash.dependencies import Output, Input
+from dash.dependencies import Output, Input, State
 import dash_bootstrap_components as dbc
 import dash_datetimepicker as dash_dt
 import pandas as pd
@@ -20,7 +20,48 @@ from ntwrkx import plot_mst
 from datetime import datetime, timedelta
 import pytz
 
+from sqlalchemy import Table, create_engine
+from sqlalchemy.sql import select
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+import sqlite3
+import warnings
+import os
+from flask_login import login_user, logout_user, current_user, LoginManager, UserMixin
+import configparser
+
+from sqlalch import init_engine, db_connect, db_session
+
+
+warnings.filterwarnings("ignore")
+uri = 'sqlite:///auth_db.sqlite'
+engine = init_engine(uri)
+conn = db_connect(engine)
+db_auth = SQLAlchemy()
+config = configparser.ConfigParser()
+
+# class for the table Users
+class Users(db_auth.Model):
+    __tablename__ = "users"
+    id = db_auth.Column(db_auth.Integer, primary_key=True)
+    username = db_auth.Column('username', db_auth.String(15), unique=True, nullable=False)
+    email = db_auth.Column('email', db_auth.String(50), unique=True)
+    password = db_auth.Column('password', db_auth.String(80))
+    def __repr__(self):
+        return '<User %r>' % self.username
+# Users_tbl = Table('users', Users.metadata)
+
+# fuction to create table using Users class
+def create_users_table():
+    Users.metadata.create_all(engine)
+
+# create the table
+# create_users_table()
+# db_auth.create_all()
+
+
 labels, symbols = all_tickers()
+
 
 # Define Dash App — https://www.bootstrapcdn.com/bootswatch/
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],  # LUX, BOOTSTRAP
@@ -28,8 +69,153 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],  # LUX, B
                             'content': 'width=device-width, initial-scale=1.0'}]  # meta tags for mobile view
                 )
 
-# Dash Layout — https://hackerthemes.com/bootstrap-cheatsheet/
+
+server = app.server
+app.config.suppress_callback_exceptions = True
+
+# Config auth db
+server.config.update(
+    SECRET_KEY=os.urandom(12),
+    SQLALCHEMY_DATABASE_URI='sqlite:///auth_db.sqlite',
+    SQLALCHEMY_TRACK_MODIFICATIONS=False
+)
+db_auth.init_app(server)
+
+
+# Setup LoginManager for server
+login_manager = LoginManager()
+login_manager.init_app(server)
+login_manager.login_view = '/login'
+
+# Define User
+
+
+class Users(UserMixin, Users):
+    pass
+
+
+create = html.Div(
+    [html.H1('Create PWE Markets Account'),
+    dcc.Location(id='create_user', refresh=True),
+    dcc.Input(id="username", type="text", placeholder="user name", maxLength=15),
+    dcc.Input(id="password", type="password", placeholder="password"),
+    dcc.Input(id="email", type="email", placeholder="email", maxLength=50),
+    html.Button('Create User', id='submit-val', n_clicks=0, className="create_user_button"),
+    html.Div(id='container-button-basic')
+    ])
+
+
+create_success = html.P('''Account successfully created.''', id='create_success')
+
+
+login = html.Div(
+    [dbc.Row(
+        dbc.Col(
+            [dcc.Location(id='url_login', refresh=True),
+            html.H2('''Please log in to continue:''', id='h1'),
+            dcc.Input(placeholder='Enter your username', type='text', id='uname-box', className='uname_box'),
+            dcc.Input(placeholder='Enter your password',type='password', id='pwd-box', className='pwd_box'),
+            html.Button(children='Login', n_clicks=0, type='submit', id='login-button', className='login_button'),
+            html.Div(children='', id='output-state')],
+            xs=6, sm=6, md=7, lg=8, xl=4, xxl=3), className="g-3", justify='center', align='center', style={"height": "61.8vh"})
+    ])
+
+
+success = html.Div(
+    [dbc.Row(
+        dbc.Col(
+    [dcc.Location(id='url_login_success', refresh=True),
+    html.Div(
+        [html.H2('Login successful.'),
+        html.Br(),
+        html.P('Select a dashboard'),
+        dcc.Link('PWE Markets Dashboard', href='/markets', className='nav_href')
+        ]),
+        html.Div(
+            [html.Br(),
+            html.Button(id='back-button', children='Go back', n_clicks=0, className='back_button')
+            ])], xs=6, sm=6, md=6, lg=5, xl=4, xxl=2),
+            className="g-3", justify='center', align='center', style={"height": "61.8vh"})
+    ])
+
+
+failed = html.Div(
+    [dcc.Location(id='url_login_df', refresh=True),
+    html.Div(
+        [html.H2('Log in Failed. Please try again.'),
+        html.Br(),
+        html.Div([login]),
+        html.Br(),
+        html.Button(id='back-button', children='Go back', n_clicks=0)
+        ])
+    ])
+
+
+logout = html.Div([dcc.Location(id='logout', refresh=True), html.Br(), html.Div(html.H2('You have been logged out - Please login')), html.Br(), html.Div([login]), html.Button(id='back-button', children='Go back', n_clicks=0)
+                   ])
+
+data = html.Div([dcc.Dropdown(
+    id='test_dropdown',
+    options=[{'label': i, 'value': i} for i in ['Day 1', 'Day 2']],
+    value='Day 1'), html.Br(), html.Div([dcc.Graph(id='test_graph')])
+])
+
+
 app.layout = dbc.Container([
+    html.Div(id='page-content',
+             className='content'),  dcc.Location(id='url', refresh=False)
+], fluid=True)
+
+
+# callback for reloading user object
+@login_manager.user_loader
+def load_user(user_id):
+    return Users.query.get(int(user_id))
+
+
+@app.callback(
+    Output('page-content', 'children'), [Input('url', 'pathname')])
+def display_page(pathname):
+    if pathname == '/':
+        return create
+    elif pathname == '/login':
+        return login
+    elif pathname == '/success':
+        if current_user.is_authenticated:
+            return success
+        else:
+            return failed
+    elif pathname == '/data':
+        if current_user.is_authenticated:
+            return data
+    elif pathname == '/markets':
+        if current_user.is_authenticated:
+            return markets
+        else:
+            return login
+    elif pathname == '/logout':
+        if current_user.is_authenticated:
+            logout_user()
+            return logout
+        else:
+            return logout
+    else:
+        return '404'
+
+
+# set the callback for the dropdown interactivity
+@app.callback(
+    [Output('test_graph', 'figure')], [Input('test_dropdown', 'value')])
+def update_graph(dropdown_value):
+    if dropdown_value == 'Day 1':
+        return [{'layout': {'title': 'Graph for Security 1'}, 'data': [{'x': [1, 2, 3, 4], 'y': [4, 1, 2, 1]}]}]
+    else:
+        return [{'layout': {'title': 'Graph for Security 2'}, 'data': [{'x': [1, 2, 3, 4], 'y': [2, 3, 2, 4]}]}]
+
+
+# # Dash Layout — https://hackerthemes.com/bootstrap-cheatsheet/
+# app.layout = dbc.Container([
+markets = html.Div([
 
     dbc.Row(
         dbc.Col(html.H1("PWE Markets Dashboard",
@@ -192,7 +378,7 @@ app.layout = dbc.Container([
         ),
     ], align="center", justify='center'),  # Vertical: start_date, center, end_date
 
-], fluid=True)
+]) # , fluid=True)
 
 
 # Callbacks (connect components)
@@ -657,6 +843,87 @@ def update_graph(json2, avlbl_sec_lst):
 
     elif (not avlbl_sec_lst) or (len(avlbl_sec_lst) == 0):
         raise dash.exceptions.PreventUpdate
+
+
+@app.callback(
+    [Output('container-button-basic', "children")], [Input('submit-val', 'n_clicks')], [State('username', 'value'), State('password', 'value'), State('email', 'value')])
+def insert_users(n_clicks, un, pw, em):
+    if n_clicks >= 1:
+        hashed_password = generate_password_hash(pw, method='sha256')
+        if un is not None and pw is not None and em is not None:
+            user = Users(username=un)
+            exist_user = Users.query.filter_by(username=user.username).first()
+            if exist_user:
+                return [html.Div([html.H2('An account for this username already exists.'), dcc.Link('Click here to Log In', href='/login')])]
+            else:
+                user.password = hashed_password
+                user.email = em
+                try:
+                    db_auth.session.add(user)
+                    db_auth.session.commit()
+                except:
+                    db_auth.session.rollback()
+                    raise
+                finally:
+                    db_auth.session.close()
+            return [login]
+        else:
+            return [html.Div([html.H2('Already have an account?'), dcc.Link('Click here to Log In', href='/login', className='nav_href')])]
+    else:
+        raise dash.exceptions.PreventUpdate
+
+
+@app.callback(
+    Output('url_login', 'pathname'), [Input('login-button', 'n_clicks')], [State('uname-box', 'value'), State('pwd-box', 'value')])
+def successful(n_clicks, input1, input2):
+    user = Users.query.filter_by(username=input1).first()
+    if user:
+        if check_password_hash(user.password, input2):
+            login_user(user)
+            return '/success'
+        else:
+            pass
+    else:
+        pass
+
+
+@app.callback(
+    Output('output-state', 'children'), [Input('login-button', 'n_clicks')], [State('uname-box', 'value'), State('pwd-box', 'value')])
+def update_output(n_clicks, input1, input2):
+    if n_clicks > 0:
+        user = Users.query.filter_by(username=input1).first()
+        if user:
+            if check_password_hash(user.password, input2):
+                return ''
+            else:
+                return 'Incorrect username or password'
+        else:
+            return 'Incorrect username or password'
+    else:
+        return ''
+
+
+@app.callback(
+    Output('url_login_success', 'pathname'), [Input('back-button', 'n_clicks')])
+def logout_dashboard(n_clicks):
+    if n_clicks > 0:
+        return '/'
+
+
+@app.callback(
+    Output('url_login_df', 'pathname'), [Input('back-button', 'n_clicks')])
+def logout_dashboard(n_clicks):
+    if n_clicks > 0:
+        return '/'
+
+# Create callbacks
+
+
+@app.callback(
+    Output('url_logout', 'pathname'), [Input('back-button', 'n_clicks')])
+def logout_dashboard(n_clicks):
+    if n_clicks > 0:
+        return '/'
 
 
 if __name__ == '__main__':
