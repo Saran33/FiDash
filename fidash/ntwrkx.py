@@ -4,8 +4,8 @@ import pandas as pd
 import numpy as np
 import networkx as nx
 # %matplotlib inline
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 import plotly.graph_objs as go
 from plotly.graph_objs import *
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot

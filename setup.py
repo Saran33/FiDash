@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name='fidash',
     packages=find_packages(include=['fidash']),
-    version='0.2',
+    version='0.22',
     author='Saran Connolly',
     description='PWE Capital Finance dashboard.',
     long_description=long_description,
@@ -23,8 +23,8 @@ setup(
     install_requires=[
         'pwe @ git+https://github.com/Saran33/pwe_analysis',
         'TickerScrape @ git+git://github.com/Saran33/TickerScrape.git',
-        'yahoo_fin', 'yfinance', 'pandas-datareader', 'dash', 'dash-datetimepicker',
-        'dash-bootstrap-components', 'SQLAlchemy', 'matplotlib', 'seaborn', 'networkx',
+        'pandas-datareader', 'dash', 'dash-datetimepicker',  # 'yahoo_fin', 'yfinance',
+        'dash-bootstrap-components', 'SQLAlchemy', 'networkx',  # 'matplotlib', 'seaborn',
         'pykalman', 'Flask-SQLAlchemy',
         'flask-login @ git+git://github.com/maxcountryman/flask-login',
 
