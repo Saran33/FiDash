@@ -14,6 +14,7 @@
     --pwe-lightest: rgb(237,221,213) !important;
     --pwe-lighter: rgb(229, 205, 191) !important;
     --pwe-skin: rgb(220, 187, 166) !important;
+    --pwe-skin-button: #DCBBA6 !important;
     --pwe-darker: rgb(211, 171, 149) !important;
     --pwe-darkest: #C48E71 !important;
     --pwe-grey: #64646F !important;
@@ -395,4 +396,114 @@ p {
     font-size : 15px !important;
     font-family: var(--font-family) !important;
     color : rgb(51, 51, 51) !important;
+}
+
+.uname_box {
+    font-family: var(--font-family) !important;
+}
+
+.pwd_box {
+    font-family: var(--font-family) !important;
+}
+
+.login_button {
+    font-family: var(--font-family) !important;
+    background-color : var(--pwe-skin-button) !important;
+    box-sizing : border-box;
+    box-shadow : none;
+    text-decoration : none solid rgb(0, 0, 0);
+    /* width : 221.594px; */
+    display : inline-block;
+    /* line-height : 20px; */
+    background-color : rgba(0, 0, 0, 0);
+    /* /* font-size : 20px;
+    padding : 25px 50px; */
+    border-radius : 0px;
+    color : rgb(0, 0, 0);
+    fill : rgb(0, 0, 0);
+    text-align : center;
+    transition : all 0.3s ease 0s;
+    background-image : linear-gradient(rgb(220, 187, 166) 0%, rgb(220, 188, 170) 100%);
+    /* margin-top : 0.618px; */
+    /* border : 3px none rgb(0, 0, 0); */
+    outline : rgb(0, 0, 0) none 0px;
+}
+
+.login_button:hover {
+    font-family: var(--font-family) !important;
+    background-color : var(--pwe-darker) !important;
+    text-decoration : none;
+    outline : none;
+    background-image : linear-gradient(180deg, var( --e-global-color-accent ) 0%, var( --pwe-skin-button ) 100%);
+}
+
+.nav_href {
+    font-family: var(--font-family) !important;
+    color : var(--pwe-skin) !important;
+}
+
+.nav_href:hover {
+    color : var(--pwe-lighter) !important;
+}
+
+.create_user_button {
+    font-family: var(--font-family) !important;
+    background-color : var(--pwe-skin-button) !important;
+    box-sizing : border-box; 
+    box-shadow : none;
+    text-decoration : none solid rgb(0, 0, 0);
+    display : inline-block;
+    background-color : rgba(0, 0, 0, 0);
+    /* font-size : 20px; */
+    border-radius : 0px;
+    color : rgb(0, 0, 0);
+    fill : rgb(0, 0, 0);
+    text-align : center;
+    transition : all 0.3s ease 0s;
+    background-image : linear-gradient(rgb(220, 187, 166) 0%, rgb(220, 188, 170) 100%);
+    margin-top : 0px;
+    margin-bottom : 2px;
+    margin-top : 0px;
+    margin-top : 0px;
+    /* border : 3px none rgb(0, 0, 0); */
+    /* outline : rgb(0, 0, 0) none 0px; */
+}
+
+.create_user_button:hover {
+    font-family: var(--font-family) !important;
+    background-color : var(--pwe-darker) !important;
+    text-decoration : none;
+    outline : none;
+    background-image : linear-gradient(180deg, var( --e-global-color-accent ) 0%, var( --pwe-skin-button ) 100%);
+}
+
+.back_button {
+    font-family: var(--font-family) !important;
+    background-color : var(--pwe-skin-button) !important;
+    box-sizing : border-box;
+    box-shadow : none;
+    text-decoration : none solid rgb(0, 0, 0);
+    /* width : 221.594px; */
+    display : inline-block;
+    /* line-height : 20px; */
+    background-color : rgba(0, 0, 0, 0);
+    /* /* font-size : 20px;
+    padding : 25px 50px; */
+    border-radius : 0px;
+    color : rgb(0, 0, 0);
+    fill : rgb(0, 0, 0);
+    text-align : center;
+    transition : all 0.3s ease 0s;
+    background-image : linear-gradient(rgb(220, 187, 166) 0%, rgb(220, 188, 170) 100%);
+    /* margin-top : 0.618px; */
+    /* border : 3px none rgb(0, 0, 0); */
+    outline : rgb(0, 0, 0) none 0px;
+}
+
+.back_button:hover {
+    font-family: var(--font-family) !important;
+    background-color : var(--pwe-darker) !important;
+    text-decoration : none;
+    outline : none;
+    background-image : linear-gradient(180deg, var( --e-global-color-accent ) 0%, var( --pwe-skin-button ) 100%);
 }

@@ -1,18 +1,15 @@
 import dash
-# import dash_core_components as dcc
 from dash import dcc
-# import dash_html_components as html
 from dash import html
 from dash.dependencies import Output, Input, State
 import dash_bootstrap_components as dbc
-import dash_datetimepicker as dash_dt
+# import dash_datetimepicker as dash_dt
+# import plotly.express as px
+# import plotly.graph_objects as go
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-
 # start_date, end_date, str_start, str_end
 from dtools import wdr_ticker, wdr_multi_ticker, indexed_vals, ext_str_lst
-from d_charts import quant_chart, single_line_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_return_dist_chart, pwe_box, pwe_heatmap
+from d_charts import quant_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_return_dist_chart, pwe_box, pwe_heatmap # single_line_chart
 from pwe.analysis import Security
 from pwe.pwetools import str_to_dt, to_utc
 from sqlalch import all_tickers
@@ -20,44 +17,24 @@ from ntwrkx import plot_mst
 from datetime import datetime, timedelta
 import pytz
 
-from sqlalchemy import Table, create_engine
-from sqlalchemy.sql import select
-from flask_sqlalchemy import SQLAlchemy
+# import sqlite3
+# from sqlalchemy import Table, create_engine
+# from sqlalchemy.sql import select
+# from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-import sqlite3
 import warnings
 import os
 from flask_login import login_user, logout_user, current_user, LoginManager, UserMixin
 import configparser
 
-from sqlalch import init_engine, db_connect, db_session
+from sqlalch import init_engine, db_connect # db_session
+from models import uri, db_auth, Users
 
 
 warnings.filterwarnings("ignore")
-uri = 'sqlite:///auth_db.sqlite'
 engine = init_engine(uri)
 conn = db_connect(engine)
-db_auth = SQLAlchemy()
 config = configparser.ConfigParser()
-
-# class for the table Users
-class Users(db_auth.Model):
-    __tablename__ = "users"
-    id = db_auth.Column(db_auth.Integer, primary_key=True)
-    username = db_auth.Column('username', db_auth.String(15), unique=True, nullable=False)
-    email = db_auth.Column('email', db_auth.String(50), unique=True)
-    password = db_auth.Column('password', db_auth.String(80))
-    def __repr__(self):
-        return '<User %r>' % self.username
-# Users_tbl = Table('users', Users.metadata)
-
-# fuction to create table using Users class
-def create_users_table():
-    Users.metadata.create_all(engine)
-
-# create the table
-# create_users_table()
-# db_auth.create_all()
 
 
 labels, symbols = all_tickers()
@@ -87,21 +64,24 @@ login_manager = LoginManager()
 login_manager.init_app(server)
 login_manager.login_view = '/login'
 
+
 # Define User
-
-
 class Users(UserMixin, Users):
     pass
 
 
 create = html.Div(
+    [dbc.Row(
+        dbc.Col(
     [html.H1('Create PWE Markets Account'),
     dcc.Location(id='create_user', refresh=True),
     dcc.Input(id="username", type="text", placeholder="user name", maxLength=15),
     dcc.Input(id="password", type="password", placeholder="password"),
     dcc.Input(id="email", type="email", placeholder="email", maxLength=50),
     html.Button('Create User', id='submit-val', n_clicks=0, className="create_user_button"),
-    html.Div(id='container-button-basic')
+    html.Div(id='container-button-basic')],
+    xs=7, sm=5, md=7, lg=8, xl=7, xxl=5),
+    className="g-3", justify='center', align='center', style={"height": "61.8vh"})
     ])
 
 
@@ -117,7 +97,8 @@ login = html.Div(
             dcc.Input(placeholder='Enter your password',type='password', id='pwd-box', className='pwd_box'),
             html.Button(children='Login', n_clicks=0, type='submit', id='login-button', className='login_button'),
             html.Div(children='', id='output-state')],
-            xs=6, sm=6, md=7, lg=8, xl=4, xxl=3), className="g-3", justify='center', align='center', style={"height": "61.8vh"})
+            xs=6, sm=6, md=7, lg=8, xl=4, xxl=3),
+            className="g-3", justify='center', align='center', style={"height": "61.8vh"})
     ])
 
 
@@ -681,7 +662,7 @@ def update_graph(sltd_sec, json1, vol_window):
                     df5.name = ticker
                     Sec = Security(df5)
                     Sec.get_returns(price='Close')
-                    chart_interval, interval = calc_interval(Sec.df)
+                    chart_intrv, interval = calc_interval(Sec.df)
                     # vol_window = 30
                     trading_periods = 252
                     Sec.get_vol(window=vol_window, returns='Price_Returns',
@@ -771,7 +752,7 @@ def update_graph(sltd_sec, json1, yz_window):
                     df7.name = ticker
                     Sec = Security(df7)
                     Sec.get_returns(price='Close')
-                    chart_interval, interval = calc_interval(Sec.df)
+                    chart_intrv, interval = calc_interval(Sec.df)
                     trading_periods = 252
                     Sec.YangZhang_estimator(
                         window=yz_window, trading_periods=trading_periods, clean=True, interval=interval)
@@ -816,7 +797,7 @@ def update_graph(json2, avlbl_sec_lst):
                 df8 = pd.read_json(json2, orient='split')
                 if not df8.empty:
                     df_corr = df8.pct_change().corr()
-                    chart_interval, interval = calc_interval(df8)
+                    chart_intrv, interval = calc_interval(df8)
                     if interval in ['hourly', 'minutes', 'seconds']:
                         title_time = True
                     else:

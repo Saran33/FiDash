@@ -1496,7 +1496,7 @@ def add_range_selector(layout, axis_name='xaxis', ranges=None, default=None):
 
 def calc_interval(df):
     """Calculate the interval between timestamps for chart labels."""
-    if df.index[1] - df.index[0] == timedelta(days=1):
+    if (df.index[1] - df.index[0] == timedelta(days=1)) or ((df.index[1] - df.index[0] >= timedelta(days=1)) and (df.index[1] - df.index[0] <= timedelta(days=4))):
         chart_interval = "Daily"
         interval = "daily"
     if df.index[1] - df.index[0] == timedelta(hours=1):
