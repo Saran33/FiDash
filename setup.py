@@ -31,7 +31,7 @@ setup(
     ],
     #package_dir={"": "src"},
     # packages=find_packages(where="fidash"),
-    python_requires=">=3.8",
+    python_requires="==3.8.11",
     setup_requires=['pytest-runner'],
     tests_require=['pytest==4.4.1'],
     test_suite='tests',
