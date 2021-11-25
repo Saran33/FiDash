@@ -28,11 +28,11 @@ from flask_login import login_user, logout_user, current_user, LoginManager, Use
 import configparser
 
 from sqlalch import init_engine, db_connect # db_session
-from models import uri, db_auth, Users
+from models import auth_uri, db_auth, Users
 
 
 warnings.filterwarnings("ignore")
-engine = init_engine(uri)
+engine = init_engine(auth_uri)
 conn = db_connect(engine)
 config = configparser.ConfigParser()
 
@@ -53,7 +53,7 @@ app.config.suppress_callback_exceptions = True
 # Config auth db
 server.config.update(
     SECRET_KEY=os.urandom(12),
-    SQLALCHEMY_DATABASE_URI='sqlite:///auth_db.sqlite',
+    SQLALCHEMY_DATABASE_URI=auth_uri,
     SQLALCHEMY_TRACK_MODIFICATIONS=False
 )
 db_auth.init_app(server)
@@ -390,7 +390,7 @@ def get_data1(sltd_sec, start_date, end_date):
                               dismissable=True, duration=6000, class_name="sec-alert", fade=True)  # use dismissable or duration=5000 for alert to close in x milliseconds
             try:
                 df1 = wdr_ticker(sltd_sec, start_date,
-                                 end_date, source='stooq')
+                                 end_date, source='stooq', save_csv=False)
                 if df1.empty:
                     return dash.no_update, alert
             except:
@@ -433,7 +433,7 @@ def get_data2(sltd_sec, start_date, end_date):
 
             try:
                 df2, missing_secs = wdr_multi_ticker(sltd_sec, start_date,
-                                                     end_date, source='stooq', price='Close')
+                                                     end_date, source='stooq', price='Close', save_csv=False)
                 print(missing_secs)
                 if missing_secs:
                     avlbl_sec_lst = [

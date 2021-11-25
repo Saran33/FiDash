@@ -2,11 +2,12 @@
 import os
 import pandas as pd
 import pandas_datareader.data as web
-from alpha_vantage.timeseries import TimeSeries
-from pwe.av import get_av_ts
-from datetime import datetime, timedelta
-import pytz
-import pwe.pwetools as pwe
+# from alpha_vantage.timeseries import TimeSeries
+# from pwe.av import get_av_ts
+# from datetime import datetime, timedelta
+# import pytz
+# import pwe.pwetools as pwe
+from pwe.pwetools import check_folder, dt_to_str, sort_index
 
 # end_date = pytz.utc.localize(datetime.utcnow())
 # str_end = pwe.dt_to_str(end_date)
@@ -20,7 +21,7 @@ import pwe.pwetools as pwe
 # os.environ["IEX_API_KEY"] =
 # os.environ["ALPHAVANTAGE_API_KEY"] =
 
-def wdr_ticker(ticker, start_date, end_date, source='stooq'):
+def wdr_ticker(ticker, start_date, end_date, source='stooq', save_csv=False):
     """
     Use web datareader to return a df of secutity price data.
 
@@ -34,12 +35,14 @@ def wdr_ticker(ticker, start_date, end_date, source='stooq'):
     tkr = ticker.replace('/', '_')
 
     print("Checking if a file for this ticker with the same start and end dates exists...")
-    # csv_start, csv_end = pwe.get_file_datetime(start_date, end_date)
-    csv_start = pwe.dt_to_str(start_date)
-    csv_end = pwe.dt_to_str(end_date)
+    # csv_start, csv_end = get_file_datetime(start_date, end_date)
+    csv_start = dt_to_str(start_date)
+    csv_end = dt_to_str(end_date)
 
-    file_path = os.path.abspath(
-        f'csv_files/{tkr}_{csv_start}_{csv_end}.csv')
+    check_folder('csv_files')
+
+    relpath = f'csv_files/{tkr}_{csv_start}_{csv_end}.csv'
+    file_path = os.path.abspath(relpath)
     if os.path.exists(file_path) == True:
 
         print("Matching local file exists.")
@@ -58,19 +61,23 @@ def wdr_ticker(ticker, start_date, end_date, source='stooq'):
         # df=df.melt(ignore_index=False, value_name="price").reset_index()
         # df = df.stack().reset_index()
         if len(df)>2:
-            df = pwe.sort_index(df, utc=True)
+            df = sort_index(df, utc=True)
             df.index.names = ['DateTime']
             print (f"DOWNLOADED: {ticker}")
             print (df[:5])
 
-            df.to_csv(file_path, index=True)
+            if save_csv:
+                print (relpath)
+                df.to_csv(relpath, index=True)
+                abs_path = os.path.abspath(relpath)
+                print ("Saved data to:",abs_path)
         else:
             print (f"No data found for {ticker}")
 
     return df
 
 
-def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close'):
+def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close', save_csv=False):
     """
     Use web datareader to return a df of secutity price data.
 
@@ -87,16 +94,17 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
         tkrs.append(tkr)
 
     print("Checking if ticker files exist locally...")
-    # csv_start, csv_end = pwe.get_file_datetime(start_date, end_date)
-    csv_start = pwe.dt_to_str(start_date)
-    csv_end = pwe.dt_to_str(end_date)
+    # csv_start, csv_end = get_file_datetime(start_date, end_date)
+    csv_start = dt_to_str(start_date)
+    csv_end = dt_to_str(end_date)
 
     df_list = []
     missing_secs = []
+    check_folder('csv_files')
 
     for tkr in tkrs:
-        file_path = os.path.abspath(
-            f'csv_files/{tkr}_{csv_start}_{csv_end}.csv')
+        relpath = f'csv_files/{tkr}_{csv_start}_{csv_end}.csv'
+        file_path = os.path.abspath(relpath)
         if os.path.exists(file_path) == True:
 
             print("Matching local file exists.")
@@ -105,7 +113,7 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
 
             df = pd.read_csv(file_path, low_memory=False, index_col=[
                             'DateTime'], parse_dates=['DateTime'], infer_datetime_format=True)
-            # df = pwe.sort_index(df, utc=False)
+            # df = sort_index(df, utc=False)
             df = df[[price]]
             df = df.rename(columns={price: tkr})
             # df.name = f"{tkr}"
@@ -118,12 +126,16 @@ def wdr_multi_ticker(tickers, start_date, end_date, source='stooq', price='Close
             # df=df.melt(ignore_index=False, value_name="price").reset_index()
             # df = df.stack().reset_index()
             if len(df)>2:
-                df = pwe.sort_index(df, utc=True)
+                df = sort_index(df, utc=True)
                 df.index.names = ['DateTime']
                 print (f"DOWNLOADED: {tkr}")
                 print (df[:5])
 
-                df.to_csv(file_path, index=True)
+                if save_csv:
+                    print (relpath)
+                    df.to_csv(relpath, index=True)
+                    abs_path = os.path.abspath(relpath)
+                    print ("Saved data to:",abs_path)
 
                 df = df[[price]]
                 df = df.rename(columns={price: tkr})

@@ -21,5 +21,43 @@ persistence_type='memory'  — remembers dropdown value selected until browser t
 persistence_type='session' — until browser tab is closed
 persistence_type='local': until browser cookies are deleted
 
+# manually force push to remote
+git push -f https://github.com/PWE-Capital/FiDash
+
+
 # Check repo size:
 curl -s https://github.com/Saran33/FiDash | jq '.size' | numfmt --to=iec --from-unit=1024
+
+# Deploy on Heroku
+### Install Heroku CLI locally
+#### macOS
+`brew tap heroku/brew && brew install heroku`
+#### Windows
+https://devcenter.heroku.com/articles/heroku-cli
+
+### Make Github Repo
+Create requirements.txt:
+`pip freeze > requirements.txt`
+In new dir:
+Clone repo:
+`git clone https://github.com/PWE-Capital/FiDash`
+`cd FiDash`
+- Add Procfile:
+```zzh
+web: gunicorn index:server
+```
+- Add gitignore:
+```zzh
+# Heroku
+*.pyc
+.DS_Store
+```
+
+### Set up Heroku
+`heroku --version`
+`heroku login`
+`git init`
+`heroku git:remote -a pwemarkets`
+`git add .`
+`git commit -am "make it better"`
+`git push heroku master`

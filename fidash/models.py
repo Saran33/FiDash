@@ -2,14 +2,15 @@
 # from sqlalchemy import Table, create_engine
 # from sqlalchemy.sql import select
 from flask_sqlalchemy import SQLAlchemy
-from sqlalch import init_engine, db_connect, db_session
+from sqlalch import get_db_path, init_engine, db_connect, db_session
 
 
 # warnings.filterwarnings("ignore")
-uri = 'sqlite:///auth_db.sqlite'
+# uri = 'sqlite:///databases/auth_db.sqlite'
+auth_uri = get_db_path('databases/auth_db.sqlite')
 # engine = init_engine(uri)
 # conn = db_connect(engine)
-db_auth = SQLAlchemy()
+db_auth = SQLAlchemy() 
 
 # class for the table Users
 class Users(db_auth.Model):

@@ -438,7 +438,7 @@ def plot_mst(df, ann_factor=252, corr_threshold=0.5, node_size_factor=10, savefi
     #                 Node color signify positive or negative cumulative returns between {start_date} to {end_date}.</p> """))
 
     if savefig:
-        mst_name = f'/charts/Eurekahedge_Minimum_Spanning_Tree_{end_date}'
+        mst_name = f'/charts/Minimum_Spanning_Tree_{end_date}'
         fig.write_html(f'.{mst_name}.html')
 
     return fig
