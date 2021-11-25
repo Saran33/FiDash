@@ -628,7 +628,7 @@ def update_graph(json2, avlbl_sec_lst, corr_thrsld):
                         ann_factor, t, p = Sec.get_ann_factor(interval, trading_periods, 24)
 
                         MST = plot_mst(df4, ann_factor=ann_factor, corr_threshold=corr_thrsld,
-                                    node_size_factor=10, savefig=True)
+                                    node_size_factor=10, savefig=False)
 
                         return MST
                     else:
