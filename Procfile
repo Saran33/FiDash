@@ -1,1 +1,1 @@
-web: gunicorn index:server
+web: gunicorn fidash_app:server

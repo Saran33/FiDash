@@ -42,7 +42,7 @@ defusedxml==0.7.1
 entrypoints==0.3
 Flask==2.0.2
 Flask-Compress==1.10.1
-Flask-Login @ git+git://github.com/maxcountryman/flask-login@c760c0ef7ccc95d49b4693200245a4f2b148d41b
+Flask-Login @ git+git://github.com/maxcountryman/flask-login
 Flask-SQLAlchemy==2.5.1
 fonttools==4.28.1
 frozenlist==1.2.0
@@ -51,6 +51,7 @@ fuzzywuzzy==0.18.0
 gevent==21.8.0
 greenlet==1.1.2
 grequests==0.6.0
+gunicorn==20.1.0
 h2==3.2.0
 hpack==3.0.0
 hyperframe==5.2.0
@@ -119,7 +120,7 @@ pycodestyle==2.8.0
 pycparser==2.21
 PyDispatcher==2.0.5
 Pygments==2.10.0
-pykalman @ git+https://github.com/pykalman/pykalman.git@8d3f8e498b64d902016a0216bf2bcc8b262d917b
+pykalman @ git+https://github.com/pykalman/pykalman.git
 pylint==2.11.1
 pyOpenSSL==21.0.0
 pyparsing==2.4.7

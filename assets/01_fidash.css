@@ -507,3 +507,36 @@ p {
     outline : none;
     background-image : linear-gradient(180deg, var( --e-global-color-accent ) 0%, var( --pwe-skin-button ) 100%);
 }
+
+.logout_btn {
+    font-family: var(--font-family) !important;
+    background-color : transparent !important;
+    box-sizing : border-box;
+    box-shadow : none;
+    text-decoration : underline solid;
+    /* width : 221.594px; */
+    display : inline-block;
+    /* line-height : 20px; */
+    background-color : transparent !important;
+    /* /* font-size : 20px;
+    padding : 25px 50px; */
+    border-radius : 0px;
+    /* color : linear-gradient(rgb(220, 187, 166) 0%, rgb(220, 188, 170) 100%) !important; */
+    /* color : var(--pwe-grey) !important; */
+    fill : linear-gradient(rgb(220, 187, 166) 0%, rgb(220, 188, 170) 100%) !important;
+    text-align : center;
+    transition : all 0.3s ease 0s;
+    background-image : transparent !important;
+    /* margin-top : 0.618px; */
+    border : 3px none;
+    outline : transparent !important;
+    margin : 19.6px 12px 8px 9.88px;
+}
+
+.logout_btn:hover {
+    font-family: var(--font-family) !important;
+    color : var(--pwe-darker) !important;
+    text-decoration : underline solid;
+    outline : none;
+    background-image : linear-gradient(180deg, var( --e-global-color-accent ) 0%, var( --pwe-skin-button ) 100%);
+}

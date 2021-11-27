@@ -1,3 +1,8 @@
+Preview markup in VS code with:
+cmd + k + v
+or
+ctrl + k + v
+
 1. Create venv:
 `virtualenv dashenv`
 2. Launch venv:
@@ -27,6 +32,9 @@ git push -f https://github.com/PWE-Capital/FiDash
 
 # Check repo size:
 curl -s https://github.com/Saran33/FiDash | jq '.size' | numfmt --to=iec --from-unit=1024
+
+### Run locally with Gunicorn
+`gunicorn fidash_app:server -b :8000`
 
 # Deploy on Heroku
 ### Install Heroku CLI locally
@@ -59,5 +67,27 @@ web: gunicorn index:server
 `git init`
 `heroku git:remote -a pwemarkets`
 `git add .`
-`git commit -am "make it better"`
-`git push heroku master`
+`git commit -am "Update"`
+`git push heroku main`
+`heroku ps:scale web=1`
+
+### Restart dynos
+`heroku ps:restart web`
+
+### Check for errors
+`heroku logs --tail`
+### Open the app in browser
+`heroku open`
+### Provision a Dyno container with a bash shell
+`heroku run bash -a pwemarkets`
+
+### View Free Dyno Hours
+`heroku ps -a pwemarkets`
+
+To switch the default branch used to deploy apps from master to main:
+https://help.heroku.com/O0EXQZTA/how-do-i-switch-branches-from-master-to-main
+`git checkout -b main`
+`git branch -D master`
+https://github.com/heroku/heroku-repo#reset
+`heroku repo:reset -a pwemarkets`
+`git push heroku main`

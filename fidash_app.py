@@ -9,7 +9,7 @@ import dash_bootstrap_components as dbc
 import pandas as pd
 # start_date, end_date, str_start, str_end
 from dtools import wdr_ticker, wdr_multi_ticker, indexed_vals, ext_str_lst
-from d_charts import quant_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_return_dist_chart, pwe_box, pwe_heatmap # single_line_chart
+from d_charts import quant_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_return_dist_chart, pwe_box, pwe_heatmap  # single_line_chart
 from pwe.analysis import Security
 from pwe.pwetools import str_to_dt, to_utc
 from sqlalch import all_tickers
@@ -27,7 +27,7 @@ import os
 from flask_login import login_user, logout_user, current_user, LoginManager, UserMixin
 import configparser
 
-from sqlalch import init_engine, db_connect # db_session
+from sqlalch import init_engine, db_connect  # db_session
 from models import auth_uri, db_auth, Users
 
 
@@ -73,67 +73,88 @@ class Users(UserMixin, Users):
 create = html.Div(
     [dbc.Row(
         dbc.Col(
-    [html.H1('Create PWE Markets Account'),
-    dcc.Location(id='create_user', refresh=True),
-    dcc.Input(id="username", type="text", placeholder="user name", maxLength=15),
-    dcc.Input(id="password", type="password", placeholder="password"),
-    dcc.Input(id="email", type="email", placeholder="email", maxLength=50),
-    html.Button('Create User', id='submit-val', n_clicks=0, className="create_user_button"),
-    html.Div(id='container-button-basic')],
-    xs=7, sm=5, md=7, lg=8, xl=7, xxl=5),
-    className="g-3", justify='center', align='center', style={"height": "61.8vh"})
-    ])
+            [html.H1('Create PWE Markets Account'),
+             dcc.Location(id='create_user', refresh=True),
+             dcc.Input(id="username", type="text",
+                       placeholder="user name", maxLength=15),
+             dcc.Input(id="password", type="password", placeholder="password"),
+             dcc.Input(id="email", type="email",
+                       placeholder="email", maxLength=50),
+             html.Button('Create User', id='submit-val',
+                         n_clicks=0, className="create_user_button"),
+             html.Div(id='container-button-basic')],
+            xs=7, sm=5, md=7, lg=8, xl=7, xxl=5),
+        className="g-3", justify='center', align='center', style={"height": "61.8vh"})
+     ])
 
 
-create_success = html.P('''Account successfully created.''', id='create_success')
+create_success = html.P(
+    '''Account successfully created.''', id='create_success')
 
 
 login = html.Div(
     [dbc.Row(
         dbc.Col(
             [dcc.Location(id='url_login', refresh=True),
-            html.H2('''Please log in to continue:''', id='h1'),
-            dcc.Input(placeholder='Enter your username', type='text', id='uname-box', className='uname_box'),
-            dcc.Input(placeholder='Enter your password',type='password', id='pwd-box', className='pwd_box'),
-            html.Button(children='Login', n_clicks=0, type='submit', id='login-button', className='login_button'),
-            html.Div(children='', id='output-state')],
+             html.H2('''Please log in to continue:''', id='h1'),
+             dcc.Input(placeholder='Enter your username', type='text',
+                       id='uname-box', className='uname_box'),
+             dcc.Input(placeholder='Enter your password',
+                       type='password', id='pwd-box', className='pwd_box'),
+             html.Button(children='Login', n_clicks=0, type='submit',
+                         id='login-button', className='login_button'),
+             html.Div(children='', id='login-text')],
             xs=6, sm=6, md=7, lg=8, xl=4, xxl=3),
-            className="g-3", justify='center', align='center', style={"height": "61.8vh"})
-    ])
+        className="g-3", justify='center', align='center', style={"height": "61.8vh"})
+     ])
 
 
 success = html.Div(
     [dbc.Row(
         dbc.Col(
-    [dcc.Location(id='url_login_success', refresh=True),
-    html.Div(
-        [html.H2('Login successful.'),
-        html.Br(),
-        html.P('Select a dashboard'),
-        dcc.Link('PWE Markets Dashboard', href='/markets', className='nav_href')
-        ]),
-        html.Div(
-            [html.Br(),
-            html.Button(id='back-button', children='Go back', n_clicks=0, className='back_button')
-            ])], xs=6, sm=6, md=6, lg=5, xl=4, xxl=2),
-            className="g-3", justify='center', align='center', style={"height": "61.8vh"})
-    ])
+            [dcc.Location(id='url_login_success', refresh=True),
+             html.Div(
+                [html.H2('Login successful.'),
+                 html.Br(),
+                 html.P('Select a dashboard'),
+                    dcc.Link('PWE Markets Dashboard',
+                             href='/markets', className='nav_href')
+                 ]),
+                html.Div(
+                [html.Br(),
+                 html.Button(id='back-button', children='Go back',
+                             n_clicks=0, className='back_button')
+                 ])], xs=6, sm=6, md=6, lg=5, xl=4, xxl=2),
+        className="g-3", justify='center', align='center', style={"height": "61.8vh"})
+     ])
 
 
 failed = html.Div(
-    [dcc.Location(id='url_login_df', refresh=True),
-    html.Div(
+    [dcc.Location(id='url_login_f', refresh=True),
+     html.Div(
         [html.H2('Log in Failed. Please try again.'),
-        html.Br(),
-        html.Div([login]),
-        html.Br(),
-        html.Button(id='back-button', children='Go back', n_clicks=0)
-        ])
-    ])
+         html.Br(),
+         html.Div([login]),
+         html.Br(),
+         html.Button(id='back-button', children='Go back', n_clicks=0)
+         ])
+     ])
 
 
-logout = html.Div([dcc.Location(id='logout', refresh=True), html.Br(), html.Div(html.H2('You have been logged out - Please login')), html.Br(), html.Div([login]), html.Button(id='back-button', children='Go back', n_clicks=0)
-                   ])
+logout = html.Div(
+    [dbc.Row(
+        dbc.Col(
+            [dcc.Location(id='url_logout', refresh=True),
+             html.Br(),
+             html.Div(
+                html.H2('You have been logged out. Click below to log back in.')),
+             html.Br(),
+             html.Div(
+                [login]),
+             html.Button(id='back-button', children='Go back', n_clicks=0)],
+            xs=8, sm=8, md=8, lg=8, xl=8, xxl=6),
+        className="g-3", justify='center', align='center', style={"height": "61.8vh"})
+     ])
 
 data = html.Div([dcc.Dropdown(
     id='test_dropdown',
@@ -142,12 +163,203 @@ data = html.Div([dcc.Dropdown(
 ])
 
 
+# # Dash Layout — https://hackerthemes.com/bootstrap-cheatsheet/
+# app.layout = dbc.Container([
+markets = html.Div([dcc.Location(id='url_markets', refresh=True),
+
+                    dbc.Row([
+                        dbc.Col(html.H1("PWE Markets Dashboard",
+                                        className='text-center text-primary mb-4 header-1'),
+                                width={"size": 10, "order": 1, "offset": 1}),
+                        dbc.Col(html.Button('Log Out', id='log-out-btn',
+                                            n_clicks=0, className="logout_btn"), width={"size": 1, "order": 2}),
+                    ]),
+
+                    dbc.Row([
+
+                        dbc.Col([
+                            html.Div(id="sec-alert", children=[]),
+                            dcc.Dropdown(id='sec-drpdwn', multi=False, value=None,
+                                         options=[{'label': x, 'value': y}
+                                                  for x, y in zip(labels, symbols)], searchable=True, placeholder='Select security...',
+                                # persistence_type= session, memory
+                                         persistence=True, persistence_type='session',
+                                         ),
+                            dcc.Store(id='intermediate-value1'),
+                            # html.Div(
+                            #     [dash_dt.DashDatetimepicker(id="dt-picker-range", utc=True, locale="en-GB"), html.Div(id="output-dt-picker-range")]
+                            # ),
+                            dcc.DatePickerRange(
+                                id='dt-picker-range',  # ID for callback
+                                calendar_orientation='horizontal',  # vertical or horizontal
+                                day_size=39,  # Size of calendar image. Default is 39
+                                # text that appears when no end date chosen
+                                end_date_placeholder_text="End Date",
+                                with_portal=False,  # If True, calendar opens in a full screen overlay portal
+                                # Display of calendar when open (0 = Sunday)
+                                first_day_of_week=0,
+                                reopen_calendar_on_clear=True,
+                                # True or False for direction of calendar (right to left)
+                                is_RTL=False,
+                                clearable=True,  # Whether the calendar is clearable
+                                number_of_months_shown=1,  # Number of months displayed in dropdown
+                                min_date_allowed=datetime(1900, 1, 1),
+                                max_date_allowed=datetime.now().date(),
+                                initial_visible_month=datetime(
+                                    2021, 1, 1),  # Default visible month
+                                start_date=(datetime.utcnow() - \
+                                            timedelta(days=365)).date(),
+                                end_date=datetime.now().date(),
+                                display_format='D MMM YYYY',  # Do
+                                # How calendar headers are displayed on open.
+                                month_format='MMMM, YYYY',
+                                # Minimum allowable days between start and end.
+                                minimum_nights=1,
+                                # Whether the user's selected dates will be cached.
+                                persistence=True,
+                                # What will be cached
+                                persisted_props=['start_date'],
+                                persistence_type='session',  # session, local, or memory. Default is 'local'
+                                updatemode='singledate'  # singledate or bothdates. Select when callback is triggered
+                            ),
+                            dcc.Checklist(id='candle_checklist',
+                                          options=[
+                                              {'label': 'Legend',
+                                                  'value': 'showlegend'},
+                                              {'label': 'Volume',
+                                                  'value': 'showvol'},
+                                              {'label': 'Boll. Bands',
+                                                  'value': 'showboll'},
+                                              {'label': 'RSI', 'value': 'showrsi'},
+                                              {'label': 'AMA', 'value': 'showama'},
+                                              {'label': 'Kalman Filter',
+                                                  'value': 'showkal'},
+                                          ],
+                                          value=['showvol'],
+                                          labelStyle={'display': 'inline-block', "margin-left": "6.18px",
+                                                      "margin-right": "3.82px", "color": "rgb(51, 51, 51)"},
+                                          inputStyle={
+                                              'background-color': 'rgb(220, 187, 166)'},
+                                          className='candle_checklist', inputClassName="checkbox", persistence=True, persistence_type='session',
+                                          ),
+                            dcc.Graph(id='cand-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                        # 'modeBarButtonsToRemove': ['pan2d','select2d'], modeBarButtonsToAdd
+                                                                        'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False})
+                        ],  # width={'size':5, 'offset':1, 'order':1},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+
+                        dbc.Col([
+                            html.Div(id="multi-sec-alert", children=[]),
+                            dcc.Dropdown(id='sec-drpdwn2', multi=True, value=[],
+                                         options=[{'label': x, 'value': x}
+                                                  for x in symbols], placeholder='Select security...',
+                                persistence=True, persistence_type='session',
+                                         ),
+                            dcc.Store(id='intermediate-value2'),
+                            dcc.Store(id='avlbl-sec-list'),
+                            dcc.Graph(id='line-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                        'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
+                        ],  # width={'size':5, 'offset':0, 'order':2},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+
+                    ], className="g-3", justify='center'),  # justify: start_date,center,end_date,between,around
+
+                    dbc.Row([
+                        dbc.Col([
+                            dcc.Graph(id='sec-hist', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                        'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
+                        ],  # width={'size':5, 'offset':1},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+
+                        dbc.Col([
+                            html.Div([
+                                dcc.Input(id="mst_corr_thrsld", type="number", placeholder="0.05", value=float(0.05), debounce=True, required=False, min=float(0.0), max=float(1.0), step=float(0.05),
+                                          # pattern='/^\d+$/',
+                                          inputMode='numeric', persistence=True, persistence_type='session', className='mst_corr_thrsld',
+                                          style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
+                                html.P('minimum correlation threshold', id="mst_corr_thrsld_text", lang="en", className="mst_corr_thrsld_text",
+                                       title="Set the minimum correlation threshold to reduce number of graph edges in the minimum spanning tree (between 0 and 1).",
+                                       style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
+                            ]),
+                            dcc.Graph(id='corr-mst', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                        'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
+                        ],  # width={'size':5, 'offset':0, 'order':2},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+                    ], align="center", justify='center'),  # Vertical: start_date, center, end_date
+
+                    dbc.Row([
+                        dbc.Col([
+                            html.Div([
+                                dcc.Input(id="vol_window", type="number", placeholder="30", value=30, debounce=True, required=False, min=2, max=10000000000, step=1,
+                                          inputMode='numeric', pattern='/^\d+$/', persistence=True, persistence_type='session', className='vol_window',
+                                          style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
+                                html.P('period rolling window', id="vol_window_text", lang="en", className="vol_window_text",
+                                       title="Number of periods in the rolling window used to calculate the realised volatility.",
+                                       style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
+                            ]),
+                            dcc.Graph(id='real-vol', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                        'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
+                        ],  # width={'size':5, 'offset':1},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+
+                        dbc.Col([
+                            dcc.Graph(id='box-plt', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
+                        ],  # width={'size':5, 'offset':0, 'order':2},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+                    ], align="center", justify='center'),  # Vertical: start_date, center, end_date
+
+                    dbc.Row([
+                        dbc.Col([
+                            html.Div([
+                                dcc.Input(id="yz_window", type="number", placeholder="30", value=30, debounce=True, required=False, min=2, max=10000000000, step=1,
+                                          inputMode='numeric', pattern='/^\d+$/', persistence=True, persistence_type='session', className='yz_window',
+                                          style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
+                                html.P('period rolling window', id="yz_window_text", lang="en", className="yz_window_text",
+                                       title="Number of periods in the rolling window used to calculate Yang-Zhang Volatility Estimator.",
+                                       style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
+                            ]),
+                            dcc.Graph(id='yz-vol', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
+                        ],  # width={'size':5, 'offset':1},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+
+                        dbc.Col([
+                            dcc.Graph(id='heatmap', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
+                                                                       'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
+                        ],  # width={'size':5, 'offset':0, 'order':2},
+                            xs=12, sm=12, md=12, lg=5, xl=5
+                        ),
+                    ], align="center", justify='center'),  # Vertical: start_date, center, end_date
+
+                    ])  # , fluid=True)
+
+
 app.layout = dbc.Container([
-    html.Div(id='page-content',
-             className='content'),  dcc.Location(id='url', refresh=False)
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content', className='content')
 ], fluid=True)
 
+app.validation_layout = html.Div([
+    create,
+    create_success,
+    login,
+    success,
+    failed,
+    logout,
+    markets,
+])
 
+
+# Callbacks (connect components)
+# --------------------------------------------
 # callback for reloading user object
 @login_manager.user_loader
 def load_user(user_id):
@@ -155,23 +367,34 @@ def load_user(user_id):
 
 
 @app.callback(
-    Output('page-content', 'children'), [Input('url', 'pathname')])
+    Output('page-content', 'children'),
+    [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/':
-        return create
+        if current_user.is_authenticated:
+            return markets
+        else:
+            return login
     elif pathname == '/login':
-        return login
+        if current_user.is_authenticated:
+            return markets
+        else:
+            return login
+    elif pathname == '/create_account':
+        return create
     elif pathname == '/success':
         if current_user.is_authenticated:
             return success
         else:
             return failed
-    elif pathname == '/data':
-        if current_user.is_authenticated:
-            return data
     elif pathname == '/markets':
         if current_user.is_authenticated:
             return markets
+        else:
+            return login
+    elif pathname == '/data':
+        if current_user.is_authenticated:
+            return data
         else:
             return login
     elif pathname == '/logout':
@@ -184,7 +407,7 @@ def display_page(pathname):
         return '404'
 
 
-# set the callback for the dropdown interactivity
+# test callback for sample chart page
 @app.callback(
     [Output('test_graph', 'figure')], [Input('test_dropdown', 'value')])
 def update_graph(dropdown_value):
@@ -194,176 +417,6 @@ def update_graph(dropdown_value):
         return [{'layout': {'title': 'Graph for Security 2'}, 'data': [{'x': [1, 2, 3, 4], 'y': [2, 3, 2, 4]}]}]
 
 
-# # Dash Layout — https://hackerthemes.com/bootstrap-cheatsheet/
-# app.layout = dbc.Container([
-markets = html.Div([
-
-    dbc.Row(
-        dbc.Col(html.H1("PWE Markets Dashboard",
-                        className='text-center text-primary mb-4 header-1'),
-                width=12)
-    ),
-
-    dbc.Row([
-
-        dbc.Col([
-            html.Div(id="sec-alert", children=[]),
-            dcc.Dropdown(id='sec-drpdwn', multi=False, value=None,
-                         options=[{'label': x, 'value': y}
-                                  for x, y in zip(labels, symbols)], searchable=True, placeholder='Select security...',
-                         # persistence_type= session, memory
-                         persistence=True, persistence_type='session',
-                         ),
-            dcc.Store(id='intermediate-value1'),
-            # html.Div(
-            #     [dash_dt.DashDatetimepicker(id="dt-picker-range", utc=True, locale="en-GB"), html.Div(id="output-dt-picker-range")]
-            # ),
-            dcc.DatePickerRange(
-                id='dt-picker-range',  # ID for callback
-                calendar_orientation='horizontal',  # vertical or horizontal
-                day_size=39,  # Size of calendar image. Default is 39
-                # text that appears when no end date chosen
-                end_date_placeholder_text="End Date",
-                with_portal=False,  # If True, calendar opens in a full screen overlay portal
-                # Display of calendar when open (0 = Sunday)
-                first_day_of_week=0,
-                reopen_calendar_on_clear=True,
-                # True or False for direction of calendar (right to left)
-                is_RTL=False,
-                clearable=True,  # Whether the calendar is clearable
-                number_of_months_shown=1,  # Number of months displayed in dropdown
-                min_date_allowed=datetime(1900, 1, 1),
-                max_date_allowed=datetime.now().date(),
-                initial_visible_month=datetime(
-                    2021, 1, 1),  # Default visible month
-                start_date=(datetime.utcnow() - timedelta(days=365)).date(),
-                end_date=datetime.now().date(),
-                display_format='D MMM YYYY',  # Do
-                # How calendar headers are displayed on open.
-                month_format='MMMM, YYYY',
-                # Minimum allowable days between start and end.
-                minimum_nights=1,
-                # Whether the user's selected dates will be cached.
-                persistence=True,
-                persisted_props=['start_date'],  # What will be cached
-                persistence_type='session',  # session, local, or memory. Default is 'local'
-                updatemode='singledate'  # singledate or bothdates. Select when callback is triggered
-            ),
-            dcc.Checklist(id='candle_checklist',
-                          options=[
-                              {'label': 'Legend', 'value': 'showlegend'},
-                              {'label': 'Volume', 'value': 'showvol'},
-                              {'label': 'Boll. Bands', 'value': 'showboll'},
-                              {'label': 'RSI', 'value': 'showrsi'},
-                              {'label': 'AMA', 'value': 'showama'},
-                              {'label': 'Kalman Filter', 'value': 'showkal'},
-                          ],
-                          value=['showvol'],
-                          labelStyle={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px", "color": "rgb(51, 51, 51)"},
-                          inputStyle = {'background-color': 'rgb(220, 187, 166)'},
-                          className='candle_checklist', inputClassName="checkbox", persistence=True, persistence_type='session',
-                          ),
-            dcc.Graph(id='cand-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                                                        # 'modeBarButtonsToRemove': ['pan2d','select2d'], modeBarButtonsToAdd
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False})
-        ],  # width={'size':5, 'offset':1, 'order':1},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-
-        dbc.Col([
-            html.Div(id="multi-sec-alert", children=[]),
-            dcc.Dropdown(id='sec-drpdwn2', multi=True, value=[],
-                         options=[{'label': x, 'value': x}
-                                  for x in symbols], placeholder='Select security...',
-                         persistence=True, persistence_type='session',
-                         ),
-            dcc.Store(id='intermediate-value2'),
-            dcc.Store(id='avlbl-sec-list'),
-            dcc.Graph(id='line-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
-        ],  # width={'size':5, 'offset':0, 'order':2},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-
-    ], className="g-3", justify='center'),  # justify: start_date,center,end_date,between,around
-
-    dbc.Row([
-        dbc.Col([
-            dcc.Graph(id='sec-hist', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
-        ],  # width={'size':5, 'offset':1},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-
-        dbc.Col([
-            html.Div([
-            dcc.Input(id="mst_corr_thrsld", type="number", placeholder="0.05", value=float(0.05), debounce=True, required=False, min=float(0.0), max=float(1.0), step=float(0.05),
-            inputMode='numeric', persistence=True, persistence_type='session', className='mst_corr_thrsld', # pattern='/^\d+$/',
-            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
-            html.P('minimum correlation threshold', id="mst_corr_thrsld_text", lang="en", className="mst_corr_thrsld_text",
-            title="Set the minimum correlation threshold to reduce number of graph edges in the minimum spanning tree (between 0 and 1).",
-            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
-            ]),
-            dcc.Graph(id='corr-mst', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
-        ],  # width={'size':5, 'offset':0, 'order':2},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-    ], align="center", justify='center'),  # Vertical: start_date, center, end_date
-
-    dbc.Row([
-        dbc.Col([
-            html.Div([
-            dcc.Input(id="vol_window", type="number", placeholder="30", value=30, debounce=True, required=False, min=2, max=10000000000, step=1,
-            inputMode='numeric', pattern='/^\d+$/', persistence=True, persistence_type='session', className='vol_window',
-            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
-            html.P('period rolling window', id="vol_window_text", lang="en", className="vol_window_text",
-            title="Number of periods in the rolling window used to calculate the realised volatility.",
-            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
-            ]),
-            dcc.Graph(id='real-vol', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
-        ],  # width={'size':5, 'offset':1},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-
-        dbc.Col([
-            dcc.Graph(id='box-plt', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
-        ],  # width={'size':5, 'offset':0, 'order':2},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-    ], align="center", justify='center'),  # Vertical: start_date, center, end_date
-
-    dbc.Row([
-        dbc.Col([
-            html.Div([
-            dcc.Input(id="yz_window", type="number", placeholder="30", value=30, debounce=True, required=False, min=2, max=10000000000, step=1,
-            inputMode='numeric', pattern='/^\d+$/', persistence=True, persistence_type='session', className='yz_window',
-            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
-            html.P('period rolling window', id="yz_window_text", lang="en", className="yz_window_text",
-            title="Number of periods in the rolling window used to calculate Yang-Zhang Volatility Estimator.",
-            style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
-            ]),
-            dcc.Graph(id='yz-vol', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
-        ],  # width={'size':5, 'offset':1},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-
-        dbc.Col([
-            dcc.Graph(id='heatmap', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
-                      'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
-        ],  # width={'size':5, 'offset':0, 'order':2},
-            xs=12, sm=12, md=12, lg=5, xl=5
-        ),
-    ], align="center", justify='center'),  # Vertical: start_date, center, end_date
-
-]) # , fluid=True)
-
-
-# Callbacks (connect components)
-# --------------------------------------------
 # Load single security dataframe
 @ app.callback(
     [Output('intermediate-value1', 'data'),
@@ -387,7 +440,8 @@ def get_data1(sltd_sec, start_date, end_date):
                 print("END DATE:", end_date)
 
             alert = dbc.Alert(f"No data available for {sltd_sec}", color="dark",  # dark danger
-                              dismissable=True, duration=6000, class_name="sec-alert", fade=True)  # use dismissable or duration=5000 for alert to close in x milliseconds
+                              dismissable=True, duration=6000, class_name="sec-alert", fade=True)
+            # use dismissable or duration=5000 for alert to close in x milliseconds
             try:
                 df1 = wdr_ticker(sltd_sec, start_date,
                                  end_date, source='stooq', save_csv=False)
@@ -625,10 +679,11 @@ def update_graph(json2, avlbl_sec_lst, corr_thrsld):
                         df4.name = "MST"
                         Sec = Security(df4)
                         trading_periods = 252
-                        ann_factor, t, p = Sec.get_ann_factor(interval, trading_periods, 24)
+                        ann_factor, t, p = Sec.get_ann_factor(
+                            interval, trading_periods, 24)
 
                         MST = plot_mst(df4, ann_factor=ann_factor, corr_threshold=corr_thrsld,
-                                    node_size_factor=10, savefig=False)
+                                       node_size_factor=10, savefig=False)
 
                         return MST
                     else:
@@ -718,9 +773,10 @@ def update_graph(json2, avlbl_sec_lst):
                         ticker = ''
                         chart_ticker = False
 
-                    box_fig = pwe_box(df6, title=f'{chart_interval} Returns', ticker=ticker, yTitle='Returns (%)', xTitle='Returns Distribution', asPlot=True, theme='white',
-                                      showlegend=False, decimals=2, orientation='v', textangle=0, file_tag=None, chart_ticker=chart_ticker,
-                                      interval='Daily', yaxis_tickformat='.2%', xaxis_tickformat='.2%', linecolor=None, title_dates='Yes', title_time=title_time)
+                    box_fig = pwe_box(df6, title=f'{chart_interval} Returns', ticker=ticker, yTitle='Returns (%)', xTitle='Returns Distribution',
+                                      asPlot=True, theme='white', showlegend=False, decimals=2, orientation='v', textangle=0, file_tag=None,
+                                      chart_ticker=chart_ticker, interval='Daily', yaxis_tickformat='.2%', xaxis_tickformat='.2%',
+                                      linecolor=None, title_dates='Yes', title_time=title_time)
 
                     return box_fig
                 else:
@@ -811,9 +867,9 @@ def update_graph(json2, avlbl_sec_lst):
                     start_date = df8.index.min()
                     end_date = df8.index.max()
 
-                    hmap_fig = pwe_heatmap(df_corr, start_date=start_date, end_date=end_date, title='Correlation Heatmap', ticker=ticker, yTitle=None, xTitle=None, asPlot=False,
-                                           asFigure=True, theme='white', showlegend=False, decimals=2, textangle=0, file_tag=None,
-                                           interval='Daily', linecolor=None, title_dates=True, colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)', ],
+                    hmap_fig = pwe_heatmap(df_corr, start_date=start_date, end_date=end_date, title='Correlation Heatmap', ticker=ticker, yTitle=None,
+                                           xTitle=None, asPlot=False, asFigure=True, theme='white', showlegend=False, decimals=2, textangle=0, file_tag=None,
+                                           interval='Daily', linecolor=None, title_dates=True, colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)'],
                                            title_time=title_time, chart_ticker=chart_ticker, top_margin=0.9, spacing=0.08, title_x=0.5, title_y=0.933)
 
                     return hmap_fig
@@ -827,11 +883,15 @@ def update_graph(json2, avlbl_sec_lst):
 
 
 @app.callback(
-    [Output('container-button-basic', "children")], [Input('submit-val', 'n_clicks')], [State('username', 'value'), State('password', 'value'), State('email', 'value')])
+    [Output('container-button-basic', "children")],
+    [Input('submit-val', 'n_clicks')],
+    [State('username', 'value'),
+     State('password', 'value'),
+     State('email', 'value')])
 def insert_users(n_clicks, un, pw, em):
-    if n_clicks >= 1:
-        hashed_password = generate_password_hash(pw, method='sha256')
+    if n_clicks > 0:
         if un is not None and pw is not None and em is not None:
+            hashed_password = generate_password_hash(pw, method='sha256')
             user = Users(username=un)
             exist_user = Users.query.filter_by(username=user.username).first()
             if exist_user:
@@ -851,61 +911,77 @@ def insert_users(n_clicks, un, pw, em):
         else:
             return [html.Div([html.H2('Already have an account?'), dcc.Link('Click here to Log In', href='/login', className='nav_href')])]
     else:
+        # raise dash.exceptions.PreventUpdate
+        return [html.Div([html.H2('Already have an account?'), dcc.Link('Click here to Log In', href='/login', className='nav_href')])]
+
+
+@app.callback(
+    [Output('url_login', 'pathname'),
+     Output('login-text', 'children')],
+    [Input('login-button', 'n_clicks')],
+    [State('uname-box', 'value'),
+     State('pwd-box', 'value')])
+def successful(n_clicks, input_unmae, input_pass):
+    if n_clicks > 0:
+        user = Users.query.filter_by(username=input_unmae).first()
+        if user:
+            if check_password_hash(user.password, input_pass):
+                login_user(user)
+                # return '/success', dash.no_update
+                print("Successful Login")
+                return '/success', dash.no_update
+            else:
+                dash.no_update, 'Incorrect password. Please try again.'
+        else:
+            dash.no_update, [html.Div([html.H2('No account for this username exists.'), dcc.Link(
+                'Would you like to create one?', href='/create')])]
+    else:
         raise dash.exceptions.PreventUpdate
 
 
-@app.callback(
-    Output('url_login', 'pathname'), [Input('login-button', 'n_clicks')], [State('uname-box', 'value'), State('pwd-box', 'value')])
-def successful(n_clicks, input1, input2):
-    user = Users.query.filter_by(username=input1).first()
-    if user:
-        if check_password_hash(user.password, input2):
-            login_user(user)
-            return '/success'
-        else:
-            pass
-    else:
-        pass
+# @app.callback(
+#     Output('output-state', 'children'),
+#     [Input('login-button', 'n_clicks')],
+#     [State('uname-box', 'value'),
+#      State('pwd-box', 'value')])
+# def update_output(n_clicks, input1, input2):
+#     if n_clicks > 0:
+#         user = Users.query.filter_by(username=input1).first()
+#         if user:
+#             if check_password_hash(user.password, input2):
+#                 return ''
+#             else:
+#                 return 'Incorrect username or password'
+#         else:
+#             return 'Incorrect username or password'
+#     else:
+#         return ''
 
 
 @app.callback(
-    Output('output-state', 'children'), [Input('login-button', 'n_clicks')], [State('uname-box', 'value'), State('pwd-box', 'value')])
-def update_output(n_clicks, input1, input2):
-    if n_clicks > 0:
-        user = Users.query.filter_by(username=input1).first()
-        if user:
-            if check_password_hash(user.password, input2):
-                return ''
-            else:
-                return 'Incorrect username or password'
-        else:
-            return 'Incorrect username or password'
-    else:
-        return ''
-
-
-@app.callback(
-    Output('url_login_success', 'pathname'), [Input('back-button', 'n_clicks')])
+    Output('url_login_success', 'pathname'),
+    [Input('back-button', 'n_clicks')])
 def logout_dashboard(n_clicks):
     if n_clicks > 0:
         return '/'
 
 
 @app.callback(
-    Output('url_login_df', 'pathname'), [Input('back-button', 'n_clicks')])
+    Output('url_login_f', 'pathname'),
+    [Input('back-button', 'n_clicks')])
 def logout_dashboard(n_clicks):
     if n_clicks > 0:
         return '/'
-
-# Create callbacks
 
 
 @app.callback(
-    Output('url_logout', 'pathname'), [Input('back-button', 'n_clicks')])
-def logout_dashboard(n_clicks):
+    Output('url_markets', 'pathname'),
+    [Input('log-out-btn', 'n_clicks')])
+def logout_nav(n_clicks):
     if n_clicks > 0:
-        return '/'
+        return '/logout'
 
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=8000)
+    # app.run_server(debug=True)
