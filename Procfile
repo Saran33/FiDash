@@ -1,1 +1,1 @@
-web: gunicorn fidash_app:server
+web: gunicorn fidash_app:server --preload

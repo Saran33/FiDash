@@ -91,3 +91,10 @@ https://help.heroku.com/O0EXQZTA/how-do-i-switch-branches-from-master-to-main
 https://github.com/heroku/heroku-repo#reset
 `heroku repo:reset -a pwemarkets`
 `git push heroku main`
+
+### RUN GUNICORN WITHOUT ASYNC
+Add to procfile:
+heroku web: gunicorn -w 1 :app --preload
+
+### Set Secret Key for cookie encryption
+`heroku config:set SECRET_KEY="YOUR_SECRET_KEY_VALUE"`

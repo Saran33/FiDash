@@ -23,7 +23,10 @@ import configparser
 
 from sqlalch import init_engine, db_connect  # db_session
 from models import auth_uri, db_auth, Users
-
+try:
+    from secret_settings import SECRET_KEY
+except ModuleNotFoundError:
+    pass
 
 warnings.filterwarnings("ignore")
 engine = init_engine(auth_uri)
@@ -45,8 +48,16 @@ server = app.server
 app.config.suppress_callback_exceptions = True
 
 # Config auth db
+try:
+    cookie_key = os.getenv('SECRET_KEY')
+    if not cookie_key:
+        cookie_key = SECRET_KEY
+except:
+    cookie_key = SECRET_KEY
+
 server.config.update(
-    SECRET_KEY=os.urandom(12),
+    # SECRET_KEY=os.urandom(12).hex(),
+    SECRET_KEY=cookie_key,
     SQLALCHEMY_DATABASE_URI=auth_uri,
     SQLALCHEMY_TRACK_MODIFICATIONS=False
 )
@@ -113,7 +124,7 @@ success = html.Div(
                  html.Br(),
                  html.P('Select a dashboard'),
                     dcc.Link('PWE Markets Dashboard',
-                             href='/markets', className='nav_href')
+                             href='/markets', className='nav_href', id='markets_href')
                  ]),
                 html.Div(
                 [html.Br(),
@@ -157,6 +168,11 @@ data = html.Div([dcc.Dropdown(
     value='Day 1'), html.Br(), html.Div([dcc.Graph(id='test_graph')])
 ])
 
+# spinner = html.Div(
+#     [dbc.Spinner(id='load_spinner', children="url_markets", color="primary", type="border", fullscreen=True,  # size="lg",
+#     spinner_style={"width": "10rem", "height": "10rem"}, spinnerClassName="load_spinner"),
+#      ]
+# )
 
 # # Dash Layout — https://hackerthemes.com/bootstrap-cheatsheet/
 # app.layout = dbc.Container([
@@ -177,7 +193,7 @@ markets = html.Div([dcc.Location(id='url_markets', refresh=True),
                             dcc.Dropdown(id='sec-drpdwn', multi=False, value=None,
                                          options=[{'label': x, 'value': y}
                                                   for x, y in zip(labels, symbols)], searchable=True, placeholder='Select security...',
-                                # persistence_type= session, memory
+                                         # persistence_type= session, memory
                                          persistence=True, persistence_type='session',
                                          ),
                             dcc.Store(id='intermediate-value1'),
@@ -220,7 +236,7 @@ markets = html.Div([dcc.Location(id='url_markets', refresh=True),
                             dcc.Checklist(id='candle_checklist',
                                           options=[
                                               {'label': 'Legend',
-                                                  'value': 'showlegend'},
+                                               'value': 'showlegend'},
                                               {'label': 'Volume',
                                                   'value': 'showvol'},
                                               {'label': 'Boll. Bands',
@@ -337,10 +353,22 @@ markets = html.Div([dcc.Location(id='url_markets', refresh=True),
                     ])  # , fluid=True)
 
 
+# app.layout = dbc.Container([
+#     dcc.Location(id='url', refresh=False),
+#     html.Div(id='page-content', className='content')
+# ], fluid=True)
+
+
 app.layout = dbc.Container([
-    dcc.Location(id='url', refresh=False),
-    html.Div(id='page-content', className='content')
-], fluid=True)
+    html.Div(
+        [dbc.Spinner(id='load_spinner', children=[
+            dcc.Location(id='url', refresh=False),
+            html.Div(id='page-content', className='content')
+        ], color="rgb(220, 187, 166)", type="border", fullscreen=True,  # size="lg",
+            spinner_style={"width": "3rem", "height": "3rem"}, spinnerClassName="load_spinner"),
+        ]
+    )], fluid=True)
+
 
 app.validation_layout = html.Div([
     create,
@@ -356,14 +384,14 @@ app.validation_layout = html.Div([
 # Callbacks (connect components)
 # --------------------------------------------
 # callback for reloading user object
-@login_manager.user_loader
+@ login_manager.user_loader
 def load_user(user_id):
-    print ("LOADED USER ID:", user_id)
+    print("LOADED USER ID:", user_id)
     return Users.query.get(int(user_id))
     # return Users.query.filter_by(id=user.id).first()
 
 
-@app.callback(
+@ app.callback(
     Output('page-content', 'children'),
     [Input('url', 'pathname')])
 def display_page(pathname):
@@ -404,8 +432,14 @@ def display_page(pathname):
         return '404'
 
 
+# @app.callback(
+#     Output("load_spinner", "children"),
+#     Input("markets_href", "is_loading")
+# )
+
+
 # test callback for sample chart page
-@app.callback(
+@ app.callback(
     [Output('test_graph', 'figure')], [Input('test_dropdown', 'value')])
 def update_graph(dropdown_value):
     if dropdown_value == 'Day 1':
@@ -879,7 +913,7 @@ def update_graph(json2, avlbl_sec_lst):
         raise dash.exceptions.PreventUpdate
 
 
-@app.callback(
+@ app.callback(
     [Output('container-button-basic', "children")],
     [Input('submit-val', 'n_clicks')],
     [State('username', 'value'),
@@ -912,7 +946,7 @@ def insert_users(n_clicks, un, pw, em):
         return [html.Div([html.H2('Already have an account?'), dcc.Link('Click here to Log In', href='/login', className='nav_href')])]
 
 
-@app.callback(
+@ app.callback(
     [Output('url_login', 'pathname'),
      Output('login-text', 'children')],
     [Input('login-button', 'n_clicks')],
@@ -925,15 +959,16 @@ def successful(n_clicks, input_unmae, input_pass):
             if check_password_hash(user.password, input_pass):
                 login_user(user, remember=True, duration=timedelta(days=7))
                 # return '/success', dash.no_update
-                print("Successful Login")
+                print("Login form submission")
                 return '/success', dash.no_update
             else:
-                dash.no_update, 'Incorrect password. Please try again.'
+                return dash.no_update, 'Incorrect password. Please try again.'
         else:
-            dash.no_update, [html.Div([html.H2('No account for this username exists.'), dcc.Link(
-                'Would you like to create one?', href='/create')])]
+            return dash.no_update, [html.Div([html.H2('No account for this username exists.'), dcc.Link(
+                'Would you like to create one?', href='/create_account')])]
     else:
-        raise dash.exceptions.PreventUpdate
+        # raise dash.exceptions.PreventUpdate
+        return dash.no_update, dash.no_update
 
 
 # @app.callback(
@@ -955,7 +990,7 @@ def successful(n_clicks, input_unmae, input_pass):
 #         return ''
 
 
-@app.callback(
+@ app.callback(
     Output('url_login_success', 'pathname'),
     [Input('back-button', 'n_clicks')])
 def logout_dashboard(n_clicks):
@@ -963,7 +998,7 @@ def logout_dashboard(n_clicks):
         return '/'
 
 
-@app.callback(
+@ app.callback(
     Output('url_login_f', 'pathname'),
     [Input('back-button', 'n_clicks')])
 def logout_dashboard(n_clicks):
@@ -971,7 +1006,7 @@ def logout_dashboard(n_clicks):
         return '/'
 
 
-@app.callback(
+@ app.callback(
     Output('url_markets', 'pathname'),
     [Input('log-out-btn', 'n_clicks')])
 def logout_nav(n_clicks):

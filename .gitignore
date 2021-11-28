@@ -8,6 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 # .ipynb
+# secret_settings.py
 .Python
 build/
 develop-eggs/
