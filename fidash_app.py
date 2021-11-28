@@ -55,6 +55,7 @@ db_auth.init_app(server)
 
 # Setup LoginManager for server
 login_manager = LoginManager()
+login_manager.session_protection = "strong"
 login_manager.init_app(server)
 login_manager.login_view = '/login'
 
@@ -357,7 +358,9 @@ app.validation_layout = html.Div([
 # callback for reloading user object
 @login_manager.user_loader
 def load_user(user_id):
+    print ("LOADED USER ID:", user_id)
     return Users.query.get(int(user_id))
+    # return Users.query.filter_by(id=user.id).first()
 
 
 @app.callback(
@@ -438,7 +441,7 @@ def get_data1(sltd_sec, start_date, end_date):
             # use dismissable or duration=5000 for alert to close in x milliseconds
             try:
                 df1 = wdr_ticker(sltd_sec, start_date,
-                                 end_date, source='stooq', save_csv=False)
+                                 end_date, source='stooq', save_csv=True)
                 if df1.empty:
                     return dash.no_update, alert
             except:
@@ -481,7 +484,7 @@ def get_data2(sltd_sec, start_date, end_date):
 
             try:
                 df2, missing_secs = wdr_multi_ticker(sltd_sec, start_date,
-                                                     end_date, source='stooq', price='Close', save_csv=False)
+                                                     end_date, source='stooq', price='Close', save_csv=True)
                 print(missing_secs)
                 if missing_secs:
                     avlbl_sec_lst = [
@@ -920,7 +923,7 @@ def successful(n_clicks, input_unmae, input_pass):
         user = Users.query.filter_by(username=input_unmae).first()
         if user:
             if check_password_hash(user.password, input_pass):
-                login_user(user)
+                login_user(user, remember=True, duration=timedelta(days=7))
                 # return '/success', dash.no_update
                 print("Successful Login")
                 return '/success', dash.no_update
