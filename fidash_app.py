@@ -7,7 +7,6 @@ import dash_bootstrap_components as dbc
 # import plotly.express as px
 # import plotly.graph_objects as go
 import pandas as pd
-# start_date, end_date, str_start, str_end
 from dtools import wdr_ticker, wdr_multi_ticker, indexed_vals, ext_str_lst
 from d_charts import quant_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_return_dist_chart, pwe_box, pwe_heatmap  # single_line_chart
 from pwe.analysis import Security
@@ -15,12 +14,7 @@ from pwe.pwetools import str_to_dt, to_utc
 from sqlalch import all_tickers
 from ntwrkx import plot_mst
 from datetime import datetime, timedelta
-import pytz
-
-# import sqlite3
-# from sqlalchemy import Table, create_engine
-# from sqlalchemy.sql import select
-# from flask_sqlalchemy import SQLAlchemy
+# import pytz
 from werkzeug.security import generate_password_hash, check_password_hash
 import warnings
 import os
@@ -940,7 +934,7 @@ def successful(n_clicks, input_unmae, input_pass):
 
 
 # @app.callback(
-#     Output('output-state', 'children'),
+#     Output('login-text', 'children'),
 #     [Input('login-button', 'n_clicks')],
 #     [State('uname-box', 'value'),
 #      State('pwd-box', 'value')])
