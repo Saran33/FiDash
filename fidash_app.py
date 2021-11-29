@@ -1,3 +1,4 @@
+from turtle import xcor
 import dash
 from dash import dcc
 from dash import html
@@ -7,7 +8,7 @@ import dash_bootstrap_components as dbc
 # import plotly.express as px
 # import plotly.graph_objects as go
 import pandas as pd
-from dtools import wdr_ticker, wdr_multi_ticker, indexed_vals, ext_str_lst
+from dtools import get_single_tkr, get_multi_tkr, indexed_vals, ext_str_lst, calc_endpoint
 from d_charts import quant_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_return_dist_chart, pwe_box, pwe_heatmap  # single_line_chart
 from pwe.analysis import Security
 from pwe.pwetools import str_to_dt, to_utc
@@ -35,7 +36,8 @@ config = configparser.ConfigParser()
 
 
 labels, symbols = all_tickers()
-
+intervals = ['minutes', '15min', '30min', 'hourly', 'daily',
+             'weekly', 'monthly']  # 'seconds', 'semi-annual', 'annual' '5min',
 
 # Define Dash App — https://www.bootstrapcdn.com/bootswatch/
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],  # LUX, BOOTSTRAP
@@ -200,39 +202,52 @@ markets = html.Div([dcc.Location(id='url_markets', refresh=True),
                             # html.Div(
                             #     [dash_dt.DashDatetimepicker(id="dt-picker-range", utc=True, locale="en-GB"), html.Div(id="output-dt-picker-range")]
                             # ),
-                            dcc.DatePickerRange(
-                                id='dt-picker-range',  # ID for callback
-                                calendar_orientation='horizontal',  # vertical or horizontal
-                                day_size=39,  # Size of calendar image. Default is 39
-                                # text that appears when no end date chosen
-                                end_date_placeholder_text="End Date",
-                                with_portal=False,  # If True, calendar opens in a full screen overlay portal
-                                # Display of calendar when open (0 = Sunday)
-                                first_day_of_week=0,
-                                reopen_calendar_on_clear=True,
-                                # True or False for direction of calendar (right to left)
-                                is_RTL=False,
-                                clearable=True,  # Whether the calendar is clearable
-                                number_of_months_shown=1,  # Number of months displayed in dropdown
-                                min_date_allowed=datetime(1900, 1, 1),
-                                max_date_allowed=datetime.now().date(),
-                                initial_visible_month=datetime(
-                                    2021, 1, 1),  # Default visible month
-                                start_date=(datetime.utcnow() - \
-                                            timedelta(days=365)).date(),
-                                end_date=datetime.now().date(),
-                                display_format='D MMM YYYY',  # Do
-                                # How calendar headers are displayed on open.
-                                month_format='MMMM, YYYY',
-                                # Minimum allowable days between start and end.
-                                minimum_nights=1,
-                                # Whether the user's selected dates will be cached.
-                                persistence=True,
-                                # What will be cached
-                                persisted_props=['start_date'],
-                                persistence_type='session',  # session, local, or memory. Default is 'local'
-                                updatemode='singledate'  # singledate or bothdates. Select when callback is triggered
-                            ),
+                            html.Div([
+                                dcc.DatePickerRange(
+                                    id='dt-picker-range',  # ID for callback
+                                    calendar_orientation='horizontal',  # vertical or horizontal
+                                    day_size=39,  # Size of calendar image. Default is 39
+                                    # text that appears when no end date chosen
+                                    end_date_placeholder_text="End Date",
+                                    with_portal=False,  # If True, calendar opens in a full screen overlay portal
+                                    # Display of calendar when open (0 = Sunday)
+                                    first_day_of_week=0,
+                                    reopen_calendar_on_clear=True,
+                                    # True or False for direction of calendar (right to left)
+                                    is_RTL=False,
+                                    clearable=True,  # Whether the calendar is clearable
+                                    number_of_months_shown=1,  # Number of months displayed in dropdown
+                                    min_date_allowed=datetime(1900, 1, 1),
+                                    max_date_allowed=datetime.now().date(),
+                                    initial_visible_month=datetime(
+                                        2021, 1, 1),  # Default visible month
+                                    start_date=(datetime.utcnow() - \
+                                                timedelta(days=365)).date(),
+                                    end_date=datetime.now().date(),
+                                    display_format='D MMM YYYY',  # Do
+                                    # How calendar headers are displayed on open.
+                                    month_format='MMMM, YYYY',
+                                    # Minimum allowable days between start and end.
+                                    minimum_nights=1,
+                                    # Whether the user's selected dates will be cached.
+                                    persistence=True,
+                                    # What will be cached
+                                    persisted_props=['start_date'],
+                                    persistence_type='session',  # session, local, or memory. Default is 'local'
+                                    updatemode='singledate',  # singledate or bothdates. Select when callback is triggered
+                                    style={'position': 'relative',
+                                           'display': 'inline-block'}
+                                ),
+                                dcc.Dropdown(id='interval-picker', multi=False, value='daily',
+                                             options=[{'label': x, 'value': x}
+                                                      for x in intervals], searchable=True, placeholder='daily', className='intervalpicker',
+                                             # persistence_type= session, memory
+                                             persistence=True, persistence_type='session',
+                                             # 'align-self' : 'end', 'justify-self': 'end', 'position' : 'relative',
+                                             style={
+                                                 'display': 'inline-block', 'width': '74.3px', 'height': '28.4x', }
+                                             # 'justify-content': 'end', 'align-content': 'end'} # 'padding' : '11px 11px 9px'
+                                             )], style={'display': 'flex', 'align-items': 'flex-start'}, className='date_and_interval_box'),
                             dcc.Checklist(id='candle_checklist',
                                           options=[
                                               {'label': 'Legend',
@@ -262,13 +277,26 @@ markets = html.Div([dcc.Location(id='url_markets', refresh=True),
 
                         dbc.Col([
                             html.Div(id="multi-sec-alert", children=[]),
-                            dcc.Dropdown(id='sec-drpdwn2', multi=True, value=[],
-                                         options=[{'label': x, 'value': x}
-                                                  for x in symbols], placeholder='Select security...',
-                                persistence=True, persistence_type='session',
-                                         ),
-                            dcc.Store(id='intermediate-value2'),
-                            dcc.Store(id='avlbl-sec-list'),
+                            html.Div([
+                            dcc.Dropdown(id='sec-drpdwn2', multi=True, value=[], options=[{'label': x, 'value': x}
+                                            for x in symbols], placeholder='Select security...',
+                                             persistence=True, persistence_type='session',
+                                             ),
+                                dcc.Store(id='intermediate-value2'),
+                                dcc.Store(id='avlbl-sec-list'),
+                                html.Div([
+                                dcc.Dropdown(id='interval-picker2', multi=False, value='daily',
+                                             options=[{'label': x, 'value': x}
+                                                      for x in intervals], searchable=True, placeholder='daily',
+                                             # persistence_type= session, memory
+                                             persistence=True, persistence_type='session',
+                                             # 'align-self' : 'end', 'justify-self': 'end', 'position' : 'relative',
+                                             style={
+                                                 'display': 'inline-block', 'width': '74.3px', 'height': '28.4x'}
+                                             # 'justify-content': 'end', 'align-content': 'end'} # 'padding' : '11px 11px 9px'
+                                             ),
+                            ], className='multisec_and_interval2_box', style={'display': 'flex', 'align-items': 'flex-end'}),
+                            ]),
                             dcc.Graph(id='line-fig', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                                                                         'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
                         ],  # width={'size':5, 'offset':0, 'order':2},
@@ -454,9 +482,10 @@ def update_graph(dropdown_value):
      Output("sec-alert", "children")],
     [Input('sec-drpdwn', 'value'),
      Input('dt-picker-range', 'start_date'),
-     Input('dt-picker-range', 'end_date')]
+     Input('dt-picker-range', 'end_date'),
+     Input('interval-picker', 'value')]
 )
-def get_data1(sltd_sec, start_date, end_date):
+def get_data1(sltd_sec, start_date, end_date, api_interval):
     if sltd_sec:
         if len(sltd_sec) > 0:
             start_date = str_to_dt(start_date, dayfirst=False)
@@ -469,13 +498,14 @@ def get_data1(sltd_sec, start_date, end_date):
                 end_date = to_utc(end_date)
             if end_date:
                 print("END DATE:", end_date)
+            endpoint = calc_endpoint(api_interval)
 
             alert = dbc.Alert(f"No data available for {sltd_sec}", color="dark",  # dark danger
                               dismissable=True, duration=6000, class_name="sec-alert", fade=True)
             # use dismissable or duration=5000 for alert to close in x milliseconds
             try:
-                df1 = wdr_ticker(sltd_sec, start_date,
-                                 end_date, source='stooq', save_csv=True)
+                df1 = get_single_tkr(
+                    sltd_sec, endpoint, api_interval, start_date, end_date, source='stooq', save_csv=True)
                 if df1.empty:
                     return dash.no_update, alert
             except:
@@ -499,9 +529,10 @@ def get_data1(sltd_sec, start_date, end_date):
      Output("multi-sec-alert", 'children')],
     [Input('sec-drpdwn2', 'value'),
      Input('dt-picker-range', 'start_date'),
-     Input('dt-picker-range', 'end_date')]
+     Input('dt-picker-range', 'end_date'),
+     Input('interval-picker2', 'value')]
 )
-def get_data2(sltd_sec, start_date, end_date):
+def get_data2(sltd_sec, start_date, end_date, api_interval):
     if sltd_sec:
         if len(sltd_sec) > 0:
             print(sltd_sec)
@@ -515,10 +546,11 @@ def get_data2(sltd_sec, start_date, end_date):
                 end_date = to_utc(end_date)
             if end_date:
                 print("END DATE:", end_date)
+            endpoint = calc_endpoint(api_interval)
 
             try:
-                df2, missing_secs = wdr_multi_ticker(sltd_sec, start_date,
-                                                     end_date, source='stooq', price='Close', save_csv=True)
+                df2, missing_secs = get_multi_tkr(
+                    sltd_sec, endpoint, api_interval, start_date, end_date, source='stooq', save_csv=True, miss_sec_lst=True)
                 print(missing_secs)
                 if missing_secs:
                     avlbl_sec_lst = [
@@ -652,9 +684,10 @@ def update_graph(json2, avlbl_sec_lst):
      Input('intermediate-value1', 'data'),
      # Input('dt-picker-range', 'start_date'),
      # Input('dt-picker-range', 'end_date')
+     Input('interval-picker', 'value')
      ]
 )
-def update_graph(sltd_sec, json1):
+def update_graph(sltd_sec, json1, api_interval):
     if sltd_sec:
         if len(sltd_sec) > 0:
             if json1 != None:
@@ -664,12 +697,12 @@ def update_graph(sltd_sec, json1):
                     df3.name = ticker
                     Sec = Security(df3)
                     Sec.get_returns(price='Close')
-                    chart_interval, interval = calc_interval(Sec.df)
+                    chart_intrv, interval = calc_interval(Sec.df, api_interval)
                     bins = int(Sec.df['Price_Returns'].count()/2)
 
                     hist = pwe_hist(Sec.df, tseries='Price_Returns', start_date=None, end_date=None, title='Returns',
                                     ticker=ticker, yTitle=None, xTitle=None, asPlot=False, asFigure=True, theme='white', showlegend=False,
-                                    decimals=2, orientation='v', textangle=0, file_tag=None, interval=chart_interval,
+                                    decimals=2, orientation='v', textangle=0, file_tag=None, interval=chart_intrv,
                                     bins=bins, histnorm='probability', histfunc='count', yaxis_tickformat='', xaxis_tickformat='.2%')
                     return hist
 
@@ -692,9 +725,10 @@ def update_graph(sltd_sec, json1):
         Input('mst_corr_thrsld', 'value'),
         # Input('dt-picker-range', 'start_date'),
         # Input('dt-picker-range', 'end_date')
+        Input('interval-picker2', 'value')
     ]
 )
-def update_graph(json2, avlbl_sec_lst, corr_thrsld):
+def update_graph(json2, avlbl_sec_lst, corr_thrsld, api_interval):
     if avlbl_sec_lst:
         if len(avlbl_sec_lst) > 0:
             if json2 != None:
@@ -706,7 +740,7 @@ def update_graph(json2, avlbl_sec_lst, corr_thrsld):
                     df4 = pd.read_json(json2, orient='split')
                     if not df4.empty:
                         df4 = df4.pct_change().fillna(0).add(1).cumprod().mul(100)
-                        chart_interval, interval = calc_interval(df4)
+                        chart_intrv, interval = calc_interval(df4, api_interval)
                         df4.name = "MST"
                         Sec = Security(df4)
                         trading_periods = 252
@@ -736,9 +770,10 @@ def update_graph(json2, avlbl_sec_lst, corr_thrsld):
      Input('vol_window', 'value'),
      # Input('dt-picker-range', 'start_date'),
      # Input('dt-picker-range', 'end_date')
+     Input('interval-picker', 'value')
      ]
 )
-def update_graph(sltd_sec, json1, vol_window):
+def update_graph(sltd_sec, json1, vol_window, api_interval):
     if sltd_sec:
         if len(sltd_sec) > 0:
             if json1 != None:
@@ -748,13 +783,12 @@ def update_graph(sltd_sec, json1, vol_window):
                     df5.name = ticker
                     Sec = Security(df5)
                     Sec.get_returns(price='Close')
-                    chart_intrv, interval = calc_interval(Sec.df)
+                    chart_intrv, interval = calc_interval(Sec.df, api_interval)
                     # vol_window = 30
                     trading_periods = 252
                     Sec.get_vol(window=vol_window, returns='Price_Returns',
                                 trading_periods=trading_periods, interval=interval)
-                    ann_factor, t, p = Sec.get_ann_factor(
-                        interval, trading_periods, 24)
+                    ann_factor, t, p = Sec.get_ann_factor(interval, trading_periods, 24)
                     start_date = Sec.df.index[Sec.df[f'Ann_Vol_{vol_window}_{p}'] > 0][0]
                     auto_start = start_date
                     end_date = Sec.df.index.max()
@@ -783,16 +817,17 @@ def update_graph(sltd_sec, json1, vol_window):
         Input('avlbl-sec-list', 'data'),
         # Input('dt-picker-range', 'start_date'),
         # Input('dt-picker-range', 'end_date')
+        Input('interval-picker2', 'value')
     ]
 )
-def update_graph(json2, avlbl_sec_lst):
+def update_graph(json2, avlbl_sec_lst, api_interval):
     if avlbl_sec_lst:
         if len(avlbl_sec_lst) > 0:
             if json2 != None:
                 df6 = pd.read_json(json2, orient='split')
                 if not df6.empty:
                     df6 = df6.pct_change()
-                    chart_interval, interval = calc_interval(df6)
+                    chart_intrv, interval = calc_interval(df6, api_interval)
                     if interval in ['hourly', 'minutes', 'seconds']:
                         title_time = True
                     else:
@@ -804,7 +839,7 @@ def update_graph(json2, avlbl_sec_lst):
                         ticker = ''
                         chart_ticker = False
 
-                    box_fig = pwe_box(df6, title=f'{chart_interval} Returns', ticker=ticker, yTitle='Returns (%)', xTitle='Returns Distribution',
+                    box_fig = pwe_box(df6, title=f'{chart_intrv} Returns', ticker=ticker, yTitle='Returns (%)', xTitle='Returns Distribution',
                                       asPlot=True, theme='white', showlegend=False, decimals=2, orientation='v', textangle=0, file_tag=None,
                                       chart_ticker=chart_ticker, interval='Daily', yaxis_tickformat='.2%', xaxis_tickformat='.2%',
                                       linecolor=None, title_dates='Yes', title_time=title_time)
@@ -827,9 +862,10 @@ def update_graph(json2, avlbl_sec_lst):
      Input('yz_window', 'value'),
      # Input('dt-picker-range', 'start_date'),
      # Input('dt-picker-range', 'end_date')
+     Input('interval-picker', 'value')
      ]
 )
-def update_graph(sltd_sec, json1, yz_window):
+def update_graph(sltd_sec, json1, yz_window, api_interval):
     if sltd_sec:
         if len(sltd_sec) > 0:
             if json1 != None:
@@ -839,7 +875,8 @@ def update_graph(sltd_sec, json1, yz_window):
                     df7.name = ticker
                     Sec = Security(df7)
                     Sec.get_returns(price='Close')
-                    chart_intrv, interval = calc_interval(Sec.df)
+                    print(Sec.df.head())
+                    chart_intrv, interval = calc_interval(Sec.df, api_interval)
                     trading_periods = 252
                     Sec.YangZhang_estimator(
                         window=yz_window, trading_periods=trading_periods, clean=True, interval=interval)
@@ -875,16 +912,17 @@ def update_graph(sltd_sec, json1, yz_window):
         Input('avlbl-sec-list', 'data'),
         # Input('dt-picker-range', 'start_date'),
         # Input('dt-picker-range', 'end_date')
+        Input('interval-picker2', 'value')
     ]
 )
-def update_graph(json2, avlbl_sec_lst):
+def update_graph(json2, avlbl_sec_lst, api_interval):
     if avlbl_sec_lst:
         if len(avlbl_sec_lst) > 0:
             if json2 != None:
                 df8 = pd.read_json(json2, orient='split')
                 if not df8.empty:
                     df_corr = df8.pct_change().corr()
-                    chart_intrv, interval = calc_interval(df8)
+                    chart_intrv, interval = calc_interval(df8, api_interval)
                     if interval in ['hourly', 'minutes', 'seconds']:
                         title_time = True
                     else:

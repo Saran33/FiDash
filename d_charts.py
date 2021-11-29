@@ -231,10 +231,11 @@ def get_chart_title(title, chart_ticker, title_dates, ticker, chart_dates):
             chart_title = ''
     return chart_title
 
-PWE_skin = "#DCBBA6" # "rgb(220,187,166)"
-skin_lighter = "#E5CDBF" # "rgb(229,205,191)"
-skin_lightest = "#EDDDD5" # "rgb(237,221,213)"
-skin_darker = "#d3ab95" # "rgb(211,171,149)"
+
+PWE_skin = "#DCBBA6"  # "rgb(220,187,166)"
+skin_lighter = "#E5CDBF"  # "rgb(229,205,191)"
+skin_lightest = "#EDDDD5"  # "rgb(237,221,213)"
+skin_darker = "#d3ab95"  # "rgb(211,171,149)"
 pwe_darkest = "#C48E71"
 black = "#000000"
 PWE_grey = "#64646F"
@@ -506,7 +507,7 @@ def quant_chart(df, start_date, end_date, ticker=None, title=None, theme='henani
 
     if showkal == True:
         qf.add_kalman(periods=kal_periods, width=2, column='Close', color=[
-                   pwe_light_teal, pwe_teal], legendgroup=False)
+            pwe_light_teal, pwe_teal], legendgroup=False)
 
     if showrsi == True:
         qf.add_rsi(periods=rsi_periods, color=PWE_skin, legendgroup=False)
@@ -514,7 +515,6 @@ def quant_chart(df, start_date, end_date, ticker=None, title=None, theme='henani
     if showvol == True:
         qf.add_volume(datalegend=True, legendgroup=True,
                       name="Volume", showlegend=False, up_color=PWE_grey)
-
 
     # for trace in qf['data']:
     #    if(trace == 'Volume'): trace['datalegend'] = False
@@ -687,7 +687,7 @@ def pwe_line_chart(df, start_date, end_date, columns=None, kind='scatter', title
         style = theme
 
     colors = [PWE_skin, PWE_grey, black, pwe_light_teal, PWE_blue,
-                skin_darker, PWE_ig_light_grey, skin_lighter, PWE_ig_dark_grey, pwe_darkest, PWE_lgrey, PWE_black, pwe_teal, PWE_dark_blue, vic_teal]
+              skin_darker, PWE_ig_light_grey, skin_lighter, PWE_ig_dark_grey, pwe_darkest, PWE_lgrey, PWE_black, pwe_teal, PWE_dark_blue, vic_teal]
 
     chart_start, chart_end, auto_start, auto_end = get_chart_dates(
         df=df, start_date=None, end_date=None, utc=True, auto_start=auto_start, auto_end=auto_end)
@@ -1125,7 +1125,7 @@ def pwe_box(df, start_date=None, end_date=None, title=None, ticker=None, yTitle=
     # colors = [PWE_skin, PWE_grey, black, vic_teal,
     #           PWE_blue, PWE_ig_light_grey, PWE_ig_dark_grey, skin_darker, skin_lighter]
     colors = [PWE_skin, PWE_grey, black, pwe_light_teal, PWE_blue,
-                PWE_ig_light_grey, PWE_ig_dark_grey, skin_darker, PWE_lgrey, PWE_black, pwe_teal, PWE_dark_blue, vic_teal, skin_lighter, pwe_darkest,]
+              PWE_ig_light_grey, PWE_ig_dark_grey, skin_darker, PWE_lgrey, PWE_black, pwe_teal, PWE_dark_blue, vic_teal, skin_lighter, pwe_darkest, ]
 
     sdate, edate, chart_dates = chart_file_dates(
         df, start_date, end_date, time=title_time)
@@ -1494,32 +1494,72 @@ def add_range_selector(layout, axis_name='xaxis', ranges=None, default=None):
         axis.setdefault('range', [start_date, end_date])
 
 
-def calc_interval(df):
+def calc_interval(df, api_interval=None):
     """Calculate the interval between timestamps for chart labels."""
-    if (df.index[1] - df.index[0] == timedelta(days=1)) or ((df.index[1] - df.index[0] >= timedelta(days=1)) and (df.index[1] - df.index[0] <= timedelta(days=4))):
-        chart_interval = "Daily"
-        interval = "daily"
-    if df.index[1] - df.index[0] == timedelta(hours=1):
-        chart_interval = "Hourly"
-        interval = "hourly"
-    if df.index[1] - df.index[0] == timedelta(minutes=1):
-        chart_interval = "Per Minute"
-        interval = "minutes"
-    if df.index[1] - df.index[0] == timedelta(seconds=1):
-        chart_interval = "Per Second"
-        interval = "seconds"
-    if df.index[1] - df.index[0] == timedelta(weeks=1):
-        chart_interval = "Weekly"
-        interval = "weekly"
-    if timedelta(days=32) >= df.index[1] - df.index[0] >= timedelta(days=27):
-        chart_interval = "Monthly"
-        interval = "monthly"
-    if timedelta(days=182) >= df.index[1] - df.index[0] >= timedelta(days=90):
-        chart_interval = "Semi-Annual"
-        interval = "semi-annual"
-    if timedelta(days=360) >= df.index[1] - df.index[0] >= timedelta(days=182):
-        chart_interval = "Annual"
-        interval = "annual"
+    print("TIMEDELTA:", df.index[2] - df.index[1])
+    try:
+        if (df.index[-1] - df.index[-2] == timedelta(days=1)) or ((df.index[-1] - df.index[-2] >= timedelta(days=1)) and (df.index[-1] - df.index[-2] <= timedelta(days=4))):
+            chart_interval = "Daily"
+            interval = "daily"
+        elif df.index[-1] - df.index[-2] == timedelta(hours=1):
+            chart_interval = "Hourly"
+            interval = "hourly"
+        elif df.index[-1] - df.index[-2] == timedelta(minutes=30):
+            chart_interval = "30min"
+            interval = "30min"
+        elif df.index[-1] - df.index[-2] == timedelta(minutes=15):
+            chart_interval = "15min"
+            interval = "15min"
+        elif df.index[-1] - df.index[-2] == timedelta(minutes=5):
+            chart_interval = "5min"
+            interval = "5min"
+        elif df.index[-1] - df.index[-2] == timedelta(minutes=1):
+            chart_interval = "Per Minute"
+            interval = "minutes"
+        elif df.index[-1] - df.index[-2] == timedelta(seconds=1):
+            chart_interval = "Per Second"
+            interval = "seconds"
+        elif df.index[-1] - df.index[-2] == timedelta(weeks=1):
+            chart_interval = "Weekly"
+            interval = "weekly"
+        elif timedelta(days=32) >= df.index[-1] - df.index[-2] >= timedelta(days=27):
+            chart_interval = "Monthly"
+            interval = "monthly"
+        elif timedelta(days=182) >= df.index[-1] - df.index[-2] >= timedelta(days=90):
+            chart_interval = "Semi-Annual"
+            interval = "semi-annual"
+        elif timedelta(days=360) >= df.index[-1] - df.index[-2] >= timedelta(days=182):
+            chart_interval = "Annual"
+            interval = "annual"
+        elif api_interval:
+            if api_interval == 'daily':
+                chart_interval = "Daily"
+                interval = "daily"
+            elif api_interval == 'hourly':
+                chart_interval = "Hourly"
+                interval = "hourly"
+            elif api_interval == '30min':
+                chart_interval = "30min"
+                interval = "30min"
+            elif api_interval == '15min':
+                chart_interval = "15min"
+                interval = "15min"
+            elif api_interval == '5min':
+                chart_interval = "5min"
+                interval = "5min"
+            elif api_interval == 'minutes':
+                chart_interval = "Per Minute"
+                interval = "minutes"
+            elif api_interval == 'weekly':
+                chart_interval = "Weekly"
+                interval = "weekly"
+            elif api_interval == 'monthly':
+                chart_interval = "Monthly"
+                interval = "monthly"
+    except:
+        print ("ERROR getting chart dates")
+
+    print ("INTERVAL:",chart_interval, interval)
     return chart_interval, interval
 
 
@@ -1560,7 +1600,8 @@ def pwe_heatmap(df, start_date=None, end_date=None, title=None, ticker=None, yTi
 
     # colors = [PWE_skin, PWE_grey]
     if not colorscale:
-        colorscale=["rgb(100, 100, 111)", "rgb(255, 255, 255)", 'rgb(220, 187, 166)',]
+        colorscale = ["rgb(100, 100, 111)",
+                      "rgb(255, 255, 255)", 'rgb(220, 187, 166)', ]
         # colorscale=[[0, "rgb(100, 100, 111)"],
         #             [0.0555555555555556, "rgb(106, 104, 116)"],
         #             [0.1111111111111111, "rgb(112,108,120)"],

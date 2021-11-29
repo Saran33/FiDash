@@ -35,6 +35,10 @@
     --font-color: rgb(255, 255, 255) !important;
 }
 
+._dash-loading {
+    min-height: 61.8vh;
+    min-width: 50vh;
+}
 body, table{
     background-color: var(--main-color);
     color: var(--font-color) !important;
@@ -81,7 +85,7 @@ p {
 
 .DateRangePickerInput {
     background-color : rgb(255, 255, 255); 
-    display : inline-block; 
+    /* display : inline-block;  */
     border-radius : 2px; 
     border : 1px solid rgb(219, 219, 219); 
     padding-right : 30px;
@@ -229,6 +233,33 @@ p {
     position : absolute; 
     bottom : 0px; 
     right : 5px;
+}
+
+.date_and_interval_box {
+    display : 'inline-flex' !important;
+    align-items : 'center' !important;
+    vertical-align: bottom  !important;
+    justify-self: stretch !important;
+    align-content: space-between !important;
+    justify-content: space-between !important;
+}
+
+.Select.intervalpicker.has-value.is-clearable.is-searchable.Select--single {
+    align-content: bottom !important;
+    justify-self: stretch !important;
+    align-self: stretch !important;
+}
+
+.multisec_and_interval2_box {
+    vertical-align : bottom !important;
+    justify-self : stretch !important;
+    place-content : end !important;
+}
+
+.Select.has-value.is-clearable.is-searchable.Select--single {
+    vertical-align : bottom !important;
+    justify-self : stretch !important;
+    place-content : end !important;   
 }
 
 .sec-alert.alert.alert-dark.alert-dismissible.show {
@@ -397,6 +428,31 @@ p {
     font-family: var(--font-family) !important;
     color : rgb(51, 51, 51) !important;
 }
+
+@media (hover: none) {
+    .mst_corr_thrsld {
+       width: 53px !important;
+       height: 42px !important;
+       font-family: var(--font-family) !important;
+       font-size : 15px !important;
+       color : rgb(51, 51, 51) !important;     
+    }
+    .vol_window {
+        width: 53px !important;
+        height: 42px !important;
+        font-family: var(--font-family) !important;
+        font-size : 15px !important;
+        color : rgb(51, 51, 51) !important;
+    }
+    .yz_window {
+        width: 53px !important;
+        height: 42px !important;
+        font-family: var(--font-family) !important;
+        font-size : 15px !important;
+        color : rgb(51, 51, 51) !important;
+    }
+}
+
 
 .uname_box {
     font-family: var(--font-family) !important;
