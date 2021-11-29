@@ -1,4 +1,4 @@
-Preview markup in VS code with:
+vPreview markup in VS code with:
 cmd + k + v
 or
 ctrl + k + v
@@ -52,7 +52,7 @@ Clone repo:
 `cd FiDash`
 - Add Procfile:
 ```zzh
-web: gunicorn index:server
+web: gunicorn fidash_app:server
 ```
 - Add gitignore:
 ```zzh
@@ -98,3 +98,6 @@ heroku web: gunicorn -w 1 :app --preload
 
 ### Set Secret Key for cookie encryption
 `heroku config:set SECRET_KEY="YOUR_SECRET_KEY_VALUE"`
+
+### Add a custom domain with a subdomain
+`heroku domains:add data.pwecapital.com`

@@ -23,7 +23,7 @@ setup(
     install_requires=[
         'pwe @ git+https://github.com/Saran33/pwe_analysis',
         'TickerScrape @ git+git://github.com/Saran33/TickerScrape.git',
-        'pandas-datareader', 'dash', 'dash-datetimepicker',  # 'yahoo_fin', 'yfinance',
+        'pandas-datareader', 'dash', # 'dash-datetimepicker',  # 'yahoo_fin', 'yfinance',
         'dash-bootstrap-components', 'SQLAlchemy', 'networkx',  # 'matplotlib', 'seaborn',
         'pykalman', 'Flask-SQLAlchemy', 'gunicorn',
         'Flask-Login @ git+git://github.com/maxcountryman/flask-login',
@@ -31,7 +31,7 @@ setup(
     ],
     #package_dir={"": "src"},
     # packages=find_packages(where="fidash"),
-    python_requires="==3.8.11",
+    python_requires="==3.9.9",
     setup_requires=['pytest-runner'],
     tests_require=['pytest==4.4.1'],
     test_suite='tests',

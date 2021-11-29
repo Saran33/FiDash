@@ -1,4 +1,3 @@
-from turtle import xcor
 import dash
 from dash import dcc
 from dash import html
