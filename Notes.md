@@ -100,4 +100,6 @@ heroku web: gunicorn -w 1 :app --preload
 `heroku config:set SECRET_KEY="YOUR_SECRET_KEY_VALUE"`
 
 ### Add a custom domain with a subdomain
-`heroku domains:add data.pwecapital.com`
+`heroku domains:add markets.pwecapital.com`
+### View existing domains
+`heroku domains`

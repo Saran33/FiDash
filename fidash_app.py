@@ -12,7 +12,7 @@ from d_charts import quant_chart, pwe_line_chart, pwe_hist, calc_interval, pwe_r
 from pwe.analysis import Security
 from pwe.pwetools import str_to_dt, to_utc
 from sqlalch import all_tickers
-from ntwrkx import plot_mst
+from ntwrkx import plot_mst, plot_3d_mst
 from datetime import datetime, timedelta
 # import pytz
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -314,14 +314,32 @@ markets = html.Div([dcc.Location(id='url_markets', refresh=True),
 
                         dbc.Col([
                             html.Div([
+                                html.Div([
                                 dcc.Input(id="mst_corr_thrsld", type="number", placeholder="0.05", value=float(0.05), debounce=True, required=False, min=float(0.0), max=float(1.0), step=float(0.05),
                                           # pattern='/^\d+$/',
                                           inputMode='numeric', persistence=True, persistence_type='session', className='mst_corr_thrsld',
                                           style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "2.36px"}),
                                 html.P('minimum correlation threshold', id="mst_corr_thrsld_text", lang="en", className="mst_corr_thrsld_text",
                                        title="Set the minimum correlation threshold to reduce number of graph edges in the minimum spanning tree (between 0 and 1).",
-                                       style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"})
-                            ]),
+                                       style={'display': 'inline-block', "margin-left": "6.18px", "margin-right": "3.82px"}),
+                                       ]),
+                                dcc.Checklist(id='3d_view_picker',
+                                            options=[
+                                                {'label': '3D',
+                                                'value': 'three_d'},
+                                                ],
+                                            value=[],
+                                            labelStyle={'display': 'inline-block', "margin-left": "6.18px",
+                                                        "margin-right": "3.82px", "color": "rgb(51, 51, 51)"},
+                                            inputStyle={
+                                                'background-color': 'rgb(220, 187, 166)'},
+                                            className='3d_view_picker', inputClassName="checkbox", labelClassName="three_d_picker_label", persistence=True, persistence_type='session',
+                                            style={
+                                                 'display': 'inline-block', 'width': '74.3px', 'height': '28.4x', }
+                                             # 'justify-content': 'end', 'align-content': 'end'} # 'padding' : '11px 11px 9px'
+                                             )],
+                                             style={'display': 'flex', 'align-items': 'flex-start'}, className='date_and_interval_box'
+                                             ),
                             dcc.Graph(id='corr-mst', figure={}, config={'scrollZoom': False, 'doubleClick': 'reset',
                                                                         'showTips': True, 'displayModeBar': 'hover', 'watermark': False, 'displaylogo': False}),
                         ],  # width={'size':5, 'offset':0, 'order':2},
@@ -724,10 +742,11 @@ def update_graph(sltd_sec, json1, api_interval):
         Input('mst_corr_thrsld', 'value'),
         # Input('dt-picker-range', 'start_date'),
         # Input('dt-picker-range', 'end_date')
-        Input('interval-picker2', 'value')
+        Input('interval-picker2', 'value'),
+        Input('3d_view_picker', 'value')
     ]
 )
-def update_graph(json2, avlbl_sec_lst, corr_thrsld, api_interval):
+def update_graph(json2, avlbl_sec_lst, corr_thrsld, api_interval, dimensions):
     if avlbl_sec_lst:
         if len(avlbl_sec_lst) > 0:
             if json2 != None:
@@ -746,8 +765,12 @@ def update_graph(json2, avlbl_sec_lst, corr_thrsld, api_interval):
                         ann_factor, t, p = Sec.get_ann_factor(
                             interval, trading_periods, 24)
 
-                        MST = plot_mst(df4, ann_factor=ann_factor, corr_threshold=corr_thrsld,
-                                       node_size_factor=10, savefig=False)
+                        three_d = True if 'three_d' in dimensions else False
+
+                        if three_d:
+                            MST = plot_3d_mst(df4, ann_factor=ann_factor, corr_threshold=corr_thrsld, node_size_factor=10, savefig=True)
+                        else:
+                            MST = plot_mst(df4, ann_factor=ann_factor, corr_threshold=corr_thrsld, node_size_factor=10, savefig=False)
 
                         return MST
                     else:

@@ -596,3 +596,9 @@ p {
     outline : none;
     background-image : linear-gradient(180deg, var( --e-global-color-accent ) 0%, var( --pwe-skin-button ) 100%);
 }
+
+.three_d_picker_label {
+    color : rgb(51, 51, 51);
+    font-family : Roboto, sans-serif;
+    font-size : 15px;
+}

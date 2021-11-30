@@ -340,6 +340,29 @@ def get_coordinates(mst):
     return Xnodes, Ynodes, Xedges, Yedges
 
 
+def get_3d_coordinates(mst):
+    """Returns the positions of nodes and edges in a format for Plotly to draw the network"""
+    # Node positions
+    pos = nx.fruchterman_reingold_layout(mst, dim=3)
+
+    Xnodes = [pos[n][0] for n in mst.nodes()]
+    Ynodes = [pos[n][1] for n in mst.nodes()]
+    Znodes = [pos[n][2] for n in mst.nodes()]
+
+    Xedges = []
+    Yedges = []
+    Zedges = []
+    for e in mst.edges():
+        # x coordinates of nodes for each edge
+        Xedges.extend([pos[e[0]][0], pos[e[1]][0], None])
+        # y coordinates of nodes for each edge
+        Yedges.extend([pos[e[0]][1], pos[e[1]][1], None])
+        # z coordinates of nodes for each edge
+        Zedges.extend([pos[e[0]][2], pos[e[1]][2], None])
+
+    return Xnodes, Ynodes, Znodes, Xedges, Yedges, Zedges
+
+
 def tooltip_stats(mst, df, log_returns_df, correlation_matrix, ann_factor=252):
     """Get stats for tooltip."""
     # make list of node labels.
@@ -458,3 +481,81 @@ def plot_mst(df, ann_factor=252, corr_threshold=0.5, node_size_factor=10, savefi
 # node_colour, node_size = assign_color_and_size(ann_returns, factor=10)
 
 # plot_mst(df, ann_factor=252, corr_threshold=0.05, node_size_factor=10, savefig=True)
+
+def plot_3d_mst(df, ann_factor=252, corr_threshold=0.5, node_size_factor=10, savefig=False):
+    """Plot a Minimum Spanning Tree with Plotly."""
+
+    start_date = df.index.min()
+    end_date = df.index.max()
+    log_returns_df = log_ret_df(df)
+    correlation_matrix = corr_matrix(log_returns_df)
+    edges = get_edge_list(correlation_matrix)
+    G0 = undirected_graph(edges)
+    Gx = set_corr_threshold(edges, threshold=corr_threshold)
+    edge_colours, edge_width, node_size = format_edges(Gx)
+    mst = create_mst(Gx)
+    edge_colours = ass_edge_colours(mst, edge_colours)
+    # graph_mst(mst, edge_colours, node_color="#DCBBA6CC")
+    ann_returns, node_label, description = tooltip_stats(mst, df, log_returns_df, correlation_matrix, ann_factor=ann_factor)
+    Xnodes, Ynodes, Znodes, Xedges, Yedges, Zedges = get_3d_coordinates(mst)
+    node_colour, node_size = assign_color_and_size(ann_returns, factor=node_size_factor)
+
+    # edges
+    tracer = go.Scatter3d(x=Xedges, y=Yedges, z=Zedges,
+                        mode='lines',
+                        line=dict(color='#DCDCDC', width=1),
+                        hoverinfo='none',
+                        showlegend=False)
+
+    # nodes
+    tracer_marker = go.Scatter3d(x=Xnodes, y=Ynodes, z=Znodes,
+                               mode='markers+text',
+                               textposition='top center',
+                               marker=dict(size=node_size,
+                                           line=dict(width=1),
+                                           color=node_colour),
+                               hoverinfo='text',
+                               hovertext=description,
+                               text=node_label,
+                               textfont=dict(size=7),
+                               showlegend=False)
+
+    axis_style = dict(title='',
+                      titlefont=dict(size=20),
+                      showgrid=False,
+                      zeroline=False,
+                      showline=False,
+                      ticks='',
+                      showticklabels=False,
+                      showbackground=False
+                      )
+
+    layout = dict(title='Correlations - Minimum Spanning Tree',
+                #   width=400,
+                #   height=620,
+                  autosize=True,
+                  showlegend=False,
+                  scene=dict(xaxis=dict(axis_style),
+                  yaxis=dict(axis_style),
+                  zaxis=dict(axis_style),
+                  ),
+                  hovermode='closest',
+                  plot_bgcolor='#fff',
+                  font_family="Roboto",
+                  font_color='#58595b',
+                  title_font_family="Roboto",
+                  title_font_color='#a5a5a5',
+                #   margin=dict(t=100),
+                  )
+
+    fig_data = [tracer, tracer_marker]
+    fig = go.Figure(dict(data=fig_data, layout=layout))
+
+    # display(HTML(f"""<p style="font-family:roboto; "font-size:100%;">Node size is proportional to annualised returns.<br>
+    #                 Node color signify positive or negative cumulative returns between {start_date} to {end_date}.</p> """))
+
+    if savefig:
+        mst_name = f'/charts/3D_Minimum_Spanning_Tree_{end_date}'
+        fig.write_html(f'.{mst_name}.html')
+
+    return fig
