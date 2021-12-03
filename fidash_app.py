@@ -636,7 +636,7 @@ def update_graph(sltd_sec, json1, quant_studies):
                                           rsi_periods=14, showama=showama, ama_periods=9, showvol=showvol, show_range=False, annots=None, textangle=0,
                                           file_tag=None, support=None, resist=None, annot_font_size=6, title_dates=False, title_time=False,
                                           chart_ticker=True, top_margin=0.9, spacing=0.08, range_fontsize=9.8885, title_x=0.5,
-                                          title_y=0.933, arrowhead=6, arrowlen=-50, showkal=showkal)
+                                          title_y=0.933, arrowhead=6, arrowlen=-50, showkal=showkal, kal_periods=20)
                     return plt_int
 
                 else:

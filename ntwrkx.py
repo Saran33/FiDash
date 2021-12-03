@@ -550,6 +550,7 @@ def plot_3d_mst(df, ann_factor=252, corr_threshold=0.5, node_size_factor=10, sav
 
     fig_data = [tracer, tracer_marker]
     fig = go.Figure(dict(data=fig_data, layout=layout))
+    fig.update_layout(scene_aspectmode="data")
 
     # display(HTML(f"""<p style="font-family:roboto; "font-size:100%;">Node size is proportional to annualised returns.<br>
     #                 Node color signify positive or negative cumulative returns between {start_date} to {end_date}.</p> """))

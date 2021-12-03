@@ -421,7 +421,7 @@ def quant_chart(df, start_date, end_date, ticker=None, title=None, theme='henani
 
     # https://notebook.community/santosjorge/cufflinks/Cufflinks%20Tutorial%20-%20Colors
 
-    Themes: ‘ggplot’,  'pearl’, 'solar’, 'space’, 'white’, 'polar’, 'henanigans’, 
+    Themes: 'ggplot',  'pearl', 'solar', 'space', 'white', 'polar', 'henanigans', 
 
     auto_start : The start date for the range that will automatically display on the chart. e.g. if set to the start of this year,
     the range will automatically display YTD, until a user clicks a different range. The default setting is 1 year prior to today's date, in GMT time.
