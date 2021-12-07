@@ -10,6 +10,12 @@ windows:
 `./dashenv/scripts/activate`
 unix:
 `source dashenv/bin/activate`
+Exit venv:
+`deactivate`
+Delete venv:
+`rm -rf dashenv`
+Remake from requitements.txt:
+`pip install -r requirements.txt`
 3. Install Dash and PWE:
 `pip install dash`
 `pip install dash-bootstrap-components`
